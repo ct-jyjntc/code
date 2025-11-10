@@ -38,7 +38,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
+      <body className="font-sans antialiased relative">
+        <div className="fixed inset-0 -z-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('https://file.xiercloud.uk/seele.jpg')",
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              backgroundAttachment: "fixed",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="absolute inset-0 bg-white/70 dark:bg-black/75" />
+        </div>
         <ThemeProvider defaultTheme="dark">{children}</ThemeProvider>
         <Analytics />
       </body>

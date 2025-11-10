@@ -4,24 +4,24 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.01 240);
+  --background: rgba(255, 255, 255, 0.4);
   --foreground: oklch(0.12 0.02 240);
-  --card: oklch(1 0 0);
+  --card: rgba(255, 255, 255, 0.9);
   --card-foreground: oklch(0.12 0.02 240);
-  --popover: oklch(1 0 0);
+  --popover: rgba(255, 255, 255, 0.95);
   --popover-foreground: oklch(0.12 0.02 240);
   --primary: oklch(0.55 0.25 220);
   --primary-foreground: oklch(0.98 0.01 240);
-  --secondary: oklch(0.95 0.01 240);
+  --secondary: rgba(255, 255, 255, 0.7);
   --secondary-foreground: oklch(0.12 0.02 240);
-  --muted: oklch(0.95 0.01 240);
-  --muted-foreground: oklch(0.45 0.01 240);
+  --muted: rgba(255, 255, 255, 0.55);
+  --muted-foreground: oklch(0.35 0.01 240);
   --accent: oklch(0.5 0.2 200);
   --accent-foreground: oklch(0.98 0.01 240);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 240);
-  --border: oklch(0.88 0.01 240);
-  --input: oklch(0.88 0.01 240);
+  --border: rgba(0, 0, 0, 0.12);
+  --input: rgba(0, 0, 0, 0.12);
   --ring: oklch(0.55 0.25 220);
   --chart-1: oklch(0.55 0.25 220);
   --chart-2: oklch(0.5 0.2 200);
@@ -40,24 +40,24 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.02 240);
+  --background: rgba(0, 0, 0, 0.45);
   --foreground: oklch(0.98 0.01 240);
-  --card: oklch(0.15 0.02 240);
+  --card: rgba(8, 8, 12, 0.85);
   --card-foreground: oklch(0.98 0.01 240);
-  --popover: oklch(0.13 0.02 240);
+  --popover: rgba(8, 8, 12, 0.9);
   --popover-foreground: oklch(0.98 0.01 240);
   --primary: oklch(0.65 0.25 220);
   --primary-foreground: oklch(0.98 0.01 240);
-  --secondary: oklch(0.2 0.02 240);
+  --secondary: rgba(8, 8, 12, 0.7);
   --secondary-foreground: oklch(0.98 0.01 240);
-  --muted: oklch(0.18 0.02 240);
-  --muted-foreground: oklch(0.65 0.01 240);
+  --muted: rgba(8, 8, 12, 0.6);
+  --muted-foreground: oklch(0.75 0.01 240);
   --accent: oklch(0.55 0.2 200);
   --accent-foreground: oklch(0.98 0.01 240);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 240);
-  --border: oklch(0.22 0.02 240);
-  --input: oklch(0.22 0.02 240);
+  --border: rgba(255, 255, 255, 0.15);
+  --input: rgba(255, 255, 255, 0.15);
   --ring: oklch(0.65 0.25 220);
   --chart-1: oklch(0.65 0.25 220);
   --chart-2: oklch(0.55 0.2 200);
@@ -120,6 +120,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: transparent;
   }
 }
