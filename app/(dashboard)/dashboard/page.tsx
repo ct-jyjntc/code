@@ -92,7 +92,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">
               总计 {stats ? formatBytes(stats.total_bandwidth) : "0 B"} · {usagePercentage}% 已使用
             </p>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="mt-3 h-2 w-full overflow-hidden bg-secondary">
               <div className="h-full bg-primary transition-all" style={{ width: `${usagePercentage}%` }} />
             </div>
           </CardContent>
@@ -165,9 +165,9 @@ export default function DashboardPage() {
         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <button
             onClick={() => router.push("/subscribe")}
-            className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
+            className="flex items-center gap-3 border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex h-10 w-10 items-center justify-center bg-primary/10">
               <CreditCard className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -178,9 +178,9 @@ export default function DashboardPage() {
 
           <button
             onClick={() => router.push("/nodes")}
-            className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
+            className="flex items-center gap-3 border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/50">
+            <div className="flex h-10 w-10 items-center justify-center bg-accent/50">
               <Server className="h-5 w-5 text-accent-foreground" />
             </div>
             <div>
@@ -191,9 +191,9 @@ export default function DashboardPage() {
 
           <button
             onClick={() => router.push("/tickets")}
-            className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
+            className="flex items-center gap-3 border border-border bg-card p-4 text-left transition-colors hover:bg-accent"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <div className="flex h-10 w-10 items-center justify-center bg-muted">
               <Activity className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>

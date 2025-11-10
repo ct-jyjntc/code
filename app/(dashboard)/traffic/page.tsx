@@ -164,7 +164,7 @@ export default function TrafficPage() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-md border">
+            <div className="overflow-x-auto border">
               <Table>
                 <TableHeader>
                   <TableRow>

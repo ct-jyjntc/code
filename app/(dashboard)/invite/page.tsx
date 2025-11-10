@@ -194,7 +194,7 @@ export default function InvitePage() {
               </div>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -211,17 +211,17 @@ export default function InvitePage() {
                       <TableCell className="font-mono font-medium">{invite.code}</TableCell>
                       <TableCell>
                         {invite.status === "active" && (
-                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                          <span className="inline-flex items-center bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                             可用
                           </span>
                         )}
                         {invite.status === "used" && (
-                          <span className="inline-flex items-center rounded-full bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+                          <span className="inline-flex items-center bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
                             已使用
                           </span>
                         )}
                         {invite.status === "expired" && (
-                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
+                          <span className="inline-flex items-center bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
                             已过期
                           </span>
                         )}

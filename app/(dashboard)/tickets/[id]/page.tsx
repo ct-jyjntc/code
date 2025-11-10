@@ -167,7 +167,7 @@ export default function TicketDetailPage() {
               </Avatar>
               <div className={`flex-1 ${message.is_admin ? "" : "flex flex-col items-end"}`}>
                 <div
-                  className={`rounded-lg p-3 ${message.is_admin ? "bg-muted" : "bg-primary text-primary-foreground"}`}
+                  className={`p-3 ${message.is_admin ? "bg-muted" : "bg-primary text-primary-foreground"}`}
                   style={{ maxWidth: "80%" }}
                 >
                   <p className="text-sm font-medium">{message.is_admin ? message.sender_name || "客服" : "您"}</p>

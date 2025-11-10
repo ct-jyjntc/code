@@ -55,7 +55,7 @@ export default function ProfilePage() {
         <div className="grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-1">
             <CardHeader>
-              <Skeleton className="h-24 w-24 rounded-full" />
+              <Skeleton className="h-24 w-24" />
             </CardHeader>
             <CardContent>
               <Skeleton className="h-6 w-32" />
@@ -106,14 +106,14 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+              <div className="flex items-center gap-3 bg-muted p-3">
                 <Shield className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm font-medium">账户状态</p>
                   <p className="text-xs text-muted-foreground">{userInfo?.subscription_status || "正常"}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+              <div className="flex items-center gap-3 bg-muted p-3">
                 <Calendar className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm font-medium">注册时间</p>

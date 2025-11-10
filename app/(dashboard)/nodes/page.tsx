@@ -103,7 +103,7 @@ export default function NodesPage() {
       {nodes.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <div className="flex h-16 w-16 items-center justify-center bg-muted">
               <Server className="h-8 w-8 text-muted-foreground" />
             </div>
             <div className="text-center">
@@ -129,7 +129,7 @@ export default function NodesPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                      className={`flex h-8 w-8 items-center justify-center ${
                         node.status === "online"
                           ? "bg-primary/10"
                           : node.status === "offline"
@@ -167,7 +167,7 @@ export default function NodesPage() {
                       <span className={`text-sm font-semibold ${getLoadColor(node.load)}`}>{node.load}%</span>
                     </div>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className="h-2 w-full overflow-hidden bg-secondary">
                     <div
                       className={`h-full transition-all ${
                         node.load < 50 ? "bg-green-500" : node.load < 80 ? "bg-yellow-500" : "bg-red-500"
