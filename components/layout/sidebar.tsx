@@ -49,9 +49,10 @@ export function Sidebar() {
   return (
     <div className="hidden h-screen w-64 flex-col border-r border-border bg-card lg:flex">
       <div className="flex h-16 items-center justify-between border-b border-border px-6">
-        <h1 className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-xl font-bold text-transparent">
-          SeeleCloud
-        </h1>
+        <div className="flex flex-col leading-tight">
+          <span className="text-xl font-semibold text-foreground tracking-tight">SeeleCloud</span>
+          <span className="text-xs uppercase text-muted-foreground tracking-[0.2em]">Control Panel</span>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
