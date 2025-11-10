@@ -149,7 +149,7 @@ export default function DashboardPage() {
               <Skeleton className="h-6 w-32" />
             </CardHeader>
             <CardContent className="flex flex-1 flex-col gap-3">
-              <div className="flex flex-1 flex-col gap-3 rounded border px-3 py-4">
+              <div className="flex flex-1 flex-col gap-3 border px-3 py-4">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-5 w-40" />
                 <Skeleton className="h-16 w-full" />
@@ -205,7 +205,7 @@ export default function DashboardPage() {
             <CardDescription>最新消息与提醒</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground lg:flex-1">
-            <div className="space-y-4 rounded border px-3 py-4 lg:flex lg:flex-1 lg:flex-col">
+            <div className="space-y-4 border px-3 py-4 lg:flex lg:flex-1 lg:flex-col">
               <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
                 <span>最新公告</span>
                 <span>
