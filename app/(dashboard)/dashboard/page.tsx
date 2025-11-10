@@ -143,19 +143,48 @@ export default function DashboardPage() {
           <p className="text-muted-foreground">欢迎回来，查看您的账户概览</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-4" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-24" />
-                <Skeleton className="mt-2 h-3 w-32" />
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid gap-4 lg:grid-cols-12">
+          <Card className="lg:col-span-5 lg:flex lg:flex-col">
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col gap-3">
+              <div className="flex flex-1 flex-col gap-3 rounded border px-3 py-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-16 w-full" />
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-7">
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+              <Skeleton className="h-32 w-full" />
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-12">
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </div>
     )

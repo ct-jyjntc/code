@@ -52,7 +52,6 @@ export function Sidebar() {
         <h1 className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-xl font-bold text-transparent">
           SeeleCloud
         </h1>
-        <ThemeToggle />
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
@@ -78,15 +77,19 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-border p-4">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5" />
-          退出登录
-        </Button>
+      <div className="border-t border-border px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <ThemeToggle />
+          <Button
+            variant="outline"
+            size="icon"
+            className="border text-muted-foreground hover:text-foreground"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-5 w-5" />
+            <span className="sr-only">退出登录</span>
+          </Button>
+        </div>
       </div>
     </div>
   )

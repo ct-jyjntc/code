@@ -1,22 +1,56 @@
 "use client"
 
-import { Moon, Sun } from "lucide-react"
+import { useEffect, useState } from "react"
+import { MonitorCog, Moon, Sun } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, resolvedTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isSystemTheme = mounted ? theme === "system" : true
+  const activeTheme = mounted ? (theme === "system" ? resolvedTheme ?? "system" : theme) : "system"
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="h-9 w-9"
-    >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">切换主题</span>
-    </Button>
+    <div className="flex items-center gap-2">
+      <Button
+        variant={isSystemTheme ? "default" : "outline"}
+        size="icon"
+        onClick={() => setTheme("system")}
+        className="h-9 w-9"
+        aria-pressed={isSystemTheme}
+        disabled={!mounted}
+      >
+        <MonitorCog className="h-5 w-5" />
+        <span className="sr-only">系统主题</span>
+      </Button>
+      <Button
+        variant={activeTheme === "light" ? "default" : "outline"}
+        size="icon"
+        onClick={() => setTheme("light")}
+        className="h-9 w-9"
+        aria-pressed={activeTheme === "light"}
+        disabled={!mounted}
+      >
+        <Sun className="h-5 w-5" />
+        <span className="sr-only">亮色主题</span>
+      </Button>
+      <Button
+        variant={activeTheme === "dark" ? "default" : "outline"}
+        size="icon"
+        onClick={() => setTheme("dark")}
+        className="h-9 w-9"
+        aria-pressed={activeTheme === "dark"}
+        disabled={!mounted}
+      >
+        <Moon className="h-5 w-5" />
+        <span className="sr-only">暗色主题</span>
+      </Button>
+    </div>
   )
 }
