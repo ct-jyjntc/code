@@ -328,3 +328,165 @@ export const mockTrafficLog = {
     },
   ],
 }
+
+export const mockSubscriptionInfo = {
+  token: "mock-token-123",
+  subscribe_url: "https://panel.seelecloud.com/api/v1/client/subscribe?token=mock-token-123",
+  plan: {
+    id: "plan_2",
+    name: "标准版",
+    transfer_enable: 322122547200, // 300GB
+    speed_limit: 300,
+    device_limit: 5,
+    features: ["Netflix 解锁", "支持 5 台设备", "高可用 IPLC 节点"],
+  },
+  u: 53687091200, // 50GB
+  d: 32212254720, // 30GB
+  transfer_enable: 322122547200,
+  expired_at: "2025-12-31T23:59:59.000Z",
+  reset_day: 1,
+  next_reset_at: "2025-02-01T00:00:00.000Z",
+  last_reset_at: "2025-01-01T00:00:00.000Z",
+  remarks: "月底自动结算，请及时续费。",
+}
+
+export const mockSessions = [
+  {
+    id: "session_1",
+    device: "MacBook Pro",
+    ip: "103.21.45.11",
+    location: "香港",
+    user_agent: "Clash for macOS 0.20.30",
+    last_active_at: "2025-01-10T12:30:00.000Z",
+  },
+  {
+    id: "session_2",
+    device: "iPhone 15 Pro",
+    ip: "42.10.88.3",
+    location: "上海",
+    user_agent: "Shadowrocket iOS 2.2.27",
+    last_active_at: "2025-01-10T08:12:00.000Z",
+  },
+  {
+    id: "session_3",
+    device: "Windows PC",
+    ip: "8.8.8.8",
+    location: "洛杉矶",
+    user_agent: "Clash for Windows 0.20.39",
+    last_active_at: "2025-01-09T19:05:00.000Z",
+  },
+]
+
+export const mockNotices = [
+  {
+    id: "notice_001",
+    title: "春节期间服务安排",
+    content:
+      "春节假期期间客服在线时间为 10:00-22:00，节点将保持 24 小时监控，如有问题请提交工单。",
+    category: "公告",
+    created_at: "2025-01-08T10:00:00.000Z",
+    pinned: true,
+  },
+  {
+    id: "notice_002",
+    title: "香港 IPLC 节点扩容完成",
+    content: "已新增两条独享链路，现已全面开放，请在节点列表中选择使用。",
+    category: "网络",
+    created_at: "2025-01-05T15:30:00.000Z",
+    pinned: false,
+  },
+  {
+    id: "notice_003",
+    title: "客户端更新提醒",
+    content: "建议 Windows 用户升级至最新 Clash for Windows 版本以获得更好的兼容性。",
+    category: "更新",
+    created_at: "2024-12-28T09:15:00.000Z",
+    pinned: false,
+  },
+]
+
+export const mockKnowledgeBase = [
+  {
+    category: "客户端配置",
+    articles: [
+      {
+        id: "kb_1",
+        title: "Windows - Clash for Windows 配置指南",
+        summary: "下载、导入订阅链接、切换节点的详细步骤。",
+        updated_at: "2025-01-02T11:00:00.000Z",
+      },
+      {
+        id: "kb_2",
+        title: "iOS - Shadowrocket 快速上手",
+        summary: "如何在 App Store 下载、配置证书并启用分流。",
+        updated_at: "2024-12-20T08:00:00.000Z",
+      },
+    ],
+  },
+  {
+    category: "常见问题",
+    articles: [
+      {
+        id: "kb_3",
+        title: "节点延迟高的排查方法",
+        summary: "从本地网络、设备负载、线路三方面定位问题。",
+        updated_at: "2024-12-15T13:30:00.000Z",
+      },
+      {
+        id: "kb_4",
+        title: "如何绑定 Telegram Bot 获取推送",
+        summary: "通过面板内的绑定操作获取验证码并完成绑定。",
+        updated_at: "2024-11-30T07:45:00.000Z",
+      },
+    ],
+  },
+]
+
+export const mockGiftCardHistory = {
+  data: [
+    {
+      id: "gift_1",
+      template_name: "元旦福利",
+      template_type_name: "流量加赠",
+      rewards_given: "额外 100GB 流量",
+      created_at: "2025-01-01T10:00:00.000Z",
+    },
+    {
+      id: "gift_2",
+      template_name: "充值返现",
+      template_type_name: "余额返利",
+      rewards_given: "返现 ¥20.00",
+      created_at: "2024-12-12T12:00:00.000Z",
+    },
+  ],
+  pagination: {
+    current_page: 1,
+    last_page: 1,
+    total: 2,
+  },
+}
+
+export const mockGiftCardPreview = {
+  code_info: {
+    template_name: "新春限定礼包",
+    expire_at: "2025-02-28T23:59:59.000Z",
+    remaining: 128,
+  },
+  reward_preview: {
+    traffic: "额外 200GB",
+    balance: "¥20 余额",
+    bonus_days: 7,
+  },
+  can_redeem: true,
+  reason: null,
+}
+
+export const mockGiftCardRedeemResult = {
+  message: "兑换成功！奖励已发放至您的账户",
+  rewards: {
+    balance: "¥20",
+    traffic: "200GB",
+    bonus_days: 7,
+  },
+  template_name: "新春限定礼包",
+}

@@ -10,6 +10,13 @@ import {
   mockTicketDetail,
   mockTrafficLog,
   mockUser,
+  mockSubscriptionInfo,
+  mockSessions,
+  mockNotices,
+  mockKnowledgeBase,
+  mockGiftCardHistory,
+  mockGiftCardPreview,
+  mockGiftCardRedeemResult,
 } from "./mock-data"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.example.com"
@@ -64,6 +71,20 @@ function getMockResponse(endpoint: string, method: string) {
   if (endpoint === "/auth/login") return mockAuthResponse
   if (endpoint === "/auth/register") return mockAuthResponse
   if (endpoint === "/user/info") return mockUser
+  if (endpoint === "/user/getSubscribe") return mockSubscriptionInfo
+  if (endpoint === "/user/getActiveSession") return { sessions: mockSessions }
+  if (endpoint === "/user/resetSecurity") {
+    return {
+      subscribe_url: `${mockSubscriptionInfo.subscribe_url}?refresh=${Date.now()}`,
+      token: `mock-token-${Date.now()}`,
+    }
+  }
+  if (endpoint === "/user/removeActiveSession") return { success: true }
+  if (endpoint === "/user/getQuickLoginUrl") {
+    return {
+      url: `https://client.seelecloud.com/login?token=quick-${Date.now()}`,
+    }
+  }
 
   // Dashboard
   if (endpoint === "/user/stats") return mockDashboardStats
@@ -83,6 +104,25 @@ function getMockResponse(endpoint: string, method: string) {
   if (endpoint === "/nodes") return mockNodes
   if (endpoint.startsWith("/nodes/") && endpoint.endsWith("/status")) {
     return { status: "online", load: 45, latency: 28 }
+  }
+
+  // Notices & Knowledge
+  if (endpoint === "/user/notice/fetch") {
+    return { data: mockNotices, total: mockNotices.length }
+  }
+  if (endpoint === "/user/knowledge/fetch") {
+    return mockKnowledgeBase
+  }
+
+  // Gift cards
+  if (endpoint === "/user/gift-card/check" && method === "POST") {
+    return mockGiftCardPreview
+  }
+  if (endpoint === "/user/gift-card/redeem" && method === "POST") {
+    return mockGiftCardRedeemResult
+  }
+  if (endpoint === "/user/gift-card/history") {
+    return mockGiftCardHistory
   }
 
   // Invites
@@ -132,6 +172,21 @@ export const api = {
     }),
 
   getUserInfo: () => fetchWithAuth("/user/info"),
+  getSubscriptionInfo: () => fetchWithAuth("/user/getSubscribe"),
+  resetSecurity: () =>
+    fetchWithAuth("/user/resetSecurity", {
+      method: "POST",
+    }),
+  getActiveSessions: () => fetchWithAuth("/user/getActiveSession"),
+  removeActiveSession: (sessionId: string) =>
+    fetchWithAuth("/user/removeActiveSession", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId }),
+    }),
+  getQuickLoginUrl: () =>
+    fetchWithAuth("/user/getQuickLoginUrl", {
+      method: "POST",
+    }),
 
   // Dashboard endpoints
   getDashboardStats: () => fetchWithAuth("/user/stats"),
@@ -169,4 +224,21 @@ export const api = {
 
   // Traffic endpoints
   getTrafficLog: () => fetchWithAuth("/user/traffic"),
+
+  // Notices & Knowledge
+  getNotices: () => fetchWithAuth("/user/notice/fetch"),
+  getKnowledgeBase: () => fetchWithAuth("/user/knowledge/fetch"),
+
+  // Gift cards
+  checkGiftCard: (code: string) =>
+    fetchWithAuth("/user/gift-card/check", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    }),
+  redeemGiftCard: (code: string) =>
+    fetchWithAuth("/user/gift-card/redeem", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    }),
+  getGiftCardHistory: () => fetchWithAuth("/user/gift-card/history"),
 }

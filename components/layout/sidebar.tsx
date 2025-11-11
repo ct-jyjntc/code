@@ -4,7 +4,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
-  FileText,
   ShoppingCart,
   Users,
   CreditCard,
@@ -13,6 +12,10 @@ import {
   MessageSquare,
   Activity,
   LogOut,
+  ShieldCheck,
+  Megaphone,
+  BookOpen,
+  Gift,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -22,14 +25,17 @@ import { useToast } from "@/hooks/use-toast"
 
 const navItems = [
   { href: "/dashboard", label: "仪表盘", icon: LayoutDashboard },
-  { href: "/docs", label: "使用文档", icon: FileText },
+  { href: "/subscription", label: "我的订阅", icon: ShieldCheck },
+  { href: "/subscribe", label: "订阅商店", icon: CreditCard },
   { href: "/orders", label: "我的订单", icon: ShoppingCart },
-  { href: "/invite", label: "我的邀请", icon: Users },
-  { href: "/subscribe", label: "购买订阅", icon: CreditCard },
   { href: "/nodes", label: "节点状态", icon: Server },
-  { href: "/profile", label: "个人中心", icon: User },
+  { href: "/notices", label: "公告通知", icon: Megaphone },
+  { href: "/knowledge", label: "知识库", icon: BookOpen },
+  { href: "/gift-cards", label: "礼品卡", icon: Gift },
+  { href: "/invite", label: "我的邀请", icon: Users },
   { href: "/tickets", label: "我的工单", icon: MessageSquare },
   { href: "/traffic", label: "流量明细", icon: Activity },
+  { href: "/profile", label: "个人中心", icon: User },
 ]
 
 export function Sidebar() {
