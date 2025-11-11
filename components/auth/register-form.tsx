@@ -16,6 +16,7 @@ import { getErrorMessage } from "@/lib/errors"
 import { useGuestConfig } from "@/hooks/use-guest-config"
 import { useCaptcha } from "@/hooks/use-captcha"
 import { useCountdown } from "@/hooks/use-countdown"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function RegisterForm() {
   const [emailInput, setEmailInput] = useState("")
@@ -29,7 +30,7 @@ export function RegisterForm() {
   const [sendingCode, setSendingCode] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const { config } = useGuestConfig()
+  const { config, loading: configLoading, error: configError } = useGuestConfig()
   const { remaining: codeCountdown, start: startCountdown, reset: resetCountdown } = useCountdown(60)
   const captcha = useCaptcha(config)
 
@@ -67,6 +68,37 @@ export function RegisterForm() {
       return false
     }
     return true
+  }
+
+  if (configLoading) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">注册</CardTitle>
+          <CardDescription>正在加载安全策略…</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[1, 2, 3].map((item) => (
+            <Skeleton key={item} className="h-10 w-full" />
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (configError) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">注册</CardTitle>
+          <CardDescription>暂时无法加载安全配置</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm text-muted-foreground">
+          <p>系统未能加载注册配置，请刷新页面后重试。</p>
+          <Button onClick={() => window.location.reload()}>刷新页面</Button>
+        </CardContent>
+      </Card>
+    )
   }
 
   const handleSendCode = async () => {

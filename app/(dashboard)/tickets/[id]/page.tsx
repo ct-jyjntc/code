@@ -152,12 +152,6 @@ export default function TicketDetailPage() {
             返回工单列表
           </Button>
         </div>
-        {ticket.status !== "closed" && (
-          <Button variant="ghost" size="sm" onClick={handleClose} disabled={closing}>
-            <XCircle className="mr-2 h-4 w-4" />
-            {closing ? "关闭中..." : "关闭工单"}
-          </Button>
-        )}
       </div>
     )
   }

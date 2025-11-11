@@ -25,7 +25,7 @@ export function LoginForm() {
   const [forgetOpen, setForgetOpen] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const { config } = useGuestConfig()
+  const { config, loading: configLoading, error: configError } = useGuestConfig()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,7 +95,13 @@ export function LoginForm() {
         </CardContent>
       </Card>
 
-      <ForgotPasswordDialog open={forgetOpen} onOpenChange={setForgetOpen} config={config} />
+      <ForgotPasswordDialog
+        open={forgetOpen}
+        onOpenChange={setForgetOpen}
+        config={config}
+        configLoading={configLoading}
+        configError={configError}
+      />
     </>
   )
 }
@@ -104,9 +110,11 @@ interface ForgotPasswordDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   config: ReturnType<typeof useGuestConfig>["config"]
+  configLoading: boolean
+  configError: Error | null
 }
 
-function ForgotPasswordDialog({ open, onOpenChange, config }: ForgotPasswordDialogProps) {
+function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, configError }: ForgotPasswordDialogProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -118,6 +126,7 @@ function ForgotPasswordDialog({ open, onOpenChange, config }: ForgotPasswordDial
   const { remaining: countdown, start: startCountdown, reset: resetCountdown } = useCountdown(60)
   const shouldResetCaptcha = Boolean(captcha.captchaRequired && config?.captcha_type !== "recaptcha-v3")
   const resetCaptchaSolution = captcha.resetSolution
+  const controlsDisabled = configLoading || Boolean(configError)
 
   useEffect(() => {
     if (!open) {
@@ -135,6 +144,14 @@ function ForgotPasswordDialog({ open, onOpenChange, config }: ForgotPasswordDial
   }, [open, resetCountdown, resetCaptchaSolution, shouldResetCaptcha])
 
   const handleSendCode = async () => {
+    if (controlsDisabled) {
+      toast({
+        title: configLoading ? "配置加载中" : "配置异常",
+        description: configLoading ? "请稍后再试" : "请刷新页面后重试",
+        variant: "destructive",
+      })
+      return
+    }
     if (!email) {
       toast({ title: "请输入邮箱", variant: "destructive" })
       return
@@ -160,6 +177,14 @@ function ForgotPasswordDialog({ open, onOpenChange, config }: ForgotPasswordDial
   }
 
   const handleResetPassword = async () => {
+    if (controlsDisabled) {
+      toast({
+        title: configLoading ? "配置加载中" : "配置异常",
+        description: configLoading ? "请稍后再试" : "请刷新页面后重试",
+        variant: "destructive",
+      })
+      return
+    }
     if (!email || !emailCode) {
       toast({ title: "请填写完整信息", variant: "destructive" })
       return
@@ -200,68 +225,84 @@ function ForgotPasswordDialog({ open, onOpenChange, config }: ForgotPasswordDial
           <DialogTitle>重置密码</DialogTitle>
           <DialogDescription>输入注册邮箱并完成验证即可重置密码</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label htmlFor="reset-email">邮箱</Label>
-            <Input
-              id="reset-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
-              required
-            />
+        {configLoading ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">正在加载安全配置…</div>
+        ) : configError ? (
+          <div className="space-y-4 py-6 text-center text-sm text-muted-foreground">
+            <p>无法加载安全配置，请刷新页面后重试。</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              刷新页面
+            </Button>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reset-email-code">邮箱验证码</Label>
-            <div className="flex gap-2">
+        ) : (
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">邮箱</Label>
               <Input
-                id="reset-email-code"
-                type="text"
-                value={emailCode}
-                onChange={(e) => setEmailCode(e.target.value)}
-                placeholder="请输入验证码"
-                className="flex-1"
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                required
               />
-              <Button type="button" variant="outline" onClick={handleSendCode} disabled={sendingCode || countdown > 0}>
-                {countdown > 0 ? `${countdown}s` : sendingCode ? "发送中..." : "发送验证码"}
-              </Button>
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="reset-password">新密码</Label>
-            <Input
-              id="reset-password"
-              type="password"
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="请输入新密码"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="reset-password-confirm">确认新密码</Label>
-            <Input
-              id="reset-password-confirm"
-              type="password"
-              minLength={8}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="再次输入新密码"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="reset-email-code">邮箱验证码</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="reset-email-code"
+                  type="text"
+                  value={emailCode}
+                  onChange={(e) => setEmailCode(e.target.value)}
+                  placeholder="请输入验证码"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSendCode}
+                  disabled={sendingCode || countdown > 0 || controlsDisabled}
+                >
+                  {countdown > 0 ? `${countdown}s` : sendingCode ? "发送中..." : "发送验证码"}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reset-password">新密码</Label>
+              <Input
+                id="reset-password"
+                type="password"
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="请输入新密码"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reset-password-confirm">确认新密码</Label>
+              <Input
+                id="reset-password-confirm"
+                type="password"
+                minLength={8}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="再次输入新密码"
+              />
+            </div>
 
-          <CaptchaWidget
-            config={config}
-            onChange={(value) => captcha.setSolution(value)}
-            refreshKey={captcha.refreshKey}
-          />
-        </div>
+            <CaptchaWidget
+              config={config}
+              onChange={(value) => captcha.setSolution(value)}
+              refreshKey={captcha.refreshKey}
+            />
+          </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             取消
           </Button>
-          <Button onClick={handleResetPassword} disabled={submitting}>
+          <Button onClick={handleResetPassword} disabled={submitting || controlsDisabled}>
             {submitting ? "提交中..." : "重置密码"}
           </Button>
         </DialogFooter>

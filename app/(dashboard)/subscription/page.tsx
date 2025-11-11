@@ -212,7 +212,10 @@ export default function SubscriptionPage() {
               复制订阅链接
             </Button>
             <Button className="w-full" onClick={handleResetSecurity} disabled={action === "reset"}>
-              <RefreshCw className="mr-2 h-4 w-4 animate-spin" aria-hidden={action !== "reset"} />
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${action === "reset" ? "animate-spin" : ""}`}
+                aria-hidden={action !== "reset"}
+              />
               重新生成链接
             </Button>
           </CardContent>
