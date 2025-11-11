@@ -8,21 +8,7 @@ export const metadata: Metadata = {
   title: "Seele Cloud",
   description: "Seele Cloud 用户控制面板",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    icon: "/avatar-2025-11-11.jpg",
   },
 }
 
