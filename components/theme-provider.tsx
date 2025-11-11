@@ -2,7 +2,8 @@
 
 import * as React from "react"
 
-type Theme = "light" | "dark"
+type Theme = "light" | "dark" | "system"
+type ResolvedTheme = "light" | "dark"
 
 type ThemeProviderProps = {
   children: React.ReactNode
@@ -12,11 +13,13 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme
+  resolvedTheme: ResolvedTheme
   setTheme: (theme: Theme) => void
 }
 
 const initialState: ThemeProviderState = {
-  theme: "dark",
+  theme: "system",
+  resolvedTheme: "light",
   setTheme: () => null,
 }
 
@@ -24,28 +27,51 @@ const ThemeProviderContext = React.createContext<ThemeProviderState>(initialStat
 
 export function ThemeProvider({
   children,
-  defaultTheme = "dark",
+  defaultTheme = "system",
   storageKey = "seelecloud-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(defaultTheme)
+  const [theme, setThemeState] = React.useState<Theme>(defaultTheme)
+  const [systemTheme, setSystemTheme] = React.useState<ResolvedTheme>("light")
 
-  React.useEffect(() => {
-    const stored = localStorage.getItem(storageKey) as Theme | null
-    if (stored) {
-      setTheme(stored)
+  const setTheme = React.useCallback((value: Theme) => {
+    setThemeState(value)
+    if (typeof window !== "undefined") {
+      localStorage.setItem(storageKey, value)
     }
   }, [storageKey])
 
   React.useEffect(() => {
+    if (typeof window === "undefined") return
+    const stored = localStorage.getItem(storageKey) as Theme | null
+    if (stored) {
+      setThemeState(stored)
+    } else {
+      setThemeState(defaultTheme)
+    }
+  }, [defaultTheme, storageKey])
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    const updateSystemTheme = () => setSystemTheme(mediaQuery.matches ? "dark" : "light")
+    updateSystemTheme()
+    mediaQuery.addEventListener?.("change", updateSystemTheme)
+    return () => mediaQuery.removeEventListener?.("change", updateSystemTheme)
+  }, [])
+
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
     const root = window.document.documentElement
     root.classList.remove("light", "dark")
-    root.classList.add(theme)
-    localStorage.setItem(storageKey, theme)
-  }, [theme, storageKey])
+    root.classList.add(resolvedTheme)
+  }, [resolvedTheme])
 
   const value = {
     theme,
+    resolvedTheme,
     setTheme,
   }
 

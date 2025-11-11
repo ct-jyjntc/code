@@ -13,39 +13,39 @@ export function ThemeToggle() {
     setMounted(true)
   }, [])
 
-  const isSystemTheme = mounted ? theme === "system" : true
   const activeTheme = mounted ? (theme === "system" ? resolvedTheme ?? "system" : theme) : "system"
+  const isSystem = theme === "system"
 
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant={isSystemTheme ? "default" : "outline"}
+        variant={isSystem ? "default" : "outline"}
         size="icon"
         onClick={() => setTheme("system")}
         className="h-9 w-9"
-        aria-pressed={isSystemTheme}
+        aria-pressed={isSystem}
         disabled={!mounted}
       >
         <MonitorCog className="h-5 w-5" />
         <span className="sr-only">系统主题</span>
       </Button>
       <Button
-        variant={activeTheme === "light" ? "default" : "outline"}
+        variant={!isSystem && activeTheme === "light" ? "default" : "outline"}
         size="icon"
         onClick={() => setTheme("light")}
         className="h-9 w-9"
-        aria-pressed={activeTheme === "light"}
+        aria-pressed={!isSystem && activeTheme === "light"}
         disabled={!mounted}
       >
         <Sun className="h-5 w-5" />
         <span className="sr-only">亮色主题</span>
       </Button>
       <Button
-        variant={activeTheme === "dark" ? "default" : "outline"}
+        variant={!isSystem && activeTheme === "dark" ? "default" : "outline"}
         size="icon"
         onClick={() => setTheme("dark")}
         className="h-9 w-9"
-        aria-pressed={activeTheme === "dark"}
+        aria-pressed={!isSystem && activeTheme === "dark"}
         disabled={!mounted}
       >
         <Moon className="h-5 w-5" />
