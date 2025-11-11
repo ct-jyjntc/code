@@ -33,7 +33,7 @@ export default function RootLayout({
           />
           <div className="absolute inset-0 bg-white/70 dark:bg-black/75" />
         </div>
-        <ThemeProvider defaultTheme="dark">{children}</ThemeProvider>
+        <ThemeProvider defaultTheme="light">{children}</ThemeProvider>
         <Analytics />
       </body>
     </html>
