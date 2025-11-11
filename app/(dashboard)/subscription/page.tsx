@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -170,7 +169,7 @@ export default function SubscriptionPage() {
                 <div className="h-full rounded-full bg-primary" style={{ width: `${usage.percent}%` }} />
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-lg border bg-card p-4">
                 <p className="text-sm text-muted-foreground">上传</p>
                 <p className="text-xl font-semibold">{formatBytes(subscription.u)}</p>
@@ -197,13 +196,17 @@ export default function SubscriptionPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>订阅链接</CardTitle>
             <CardDescription>导入到客户端即可同步节点</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Textarea readOnly value={subscription.subscribe_url} className="h-32 resize-none font-mono text-sm" />
+            <Textarea
+              readOnly
+              value={subscription.subscribe_url}
+              className="h-32 w-full resize-none font-mono text-sm break-all"
+            />
             <Button className="w-full" variant="secondary" onClick={handleCopySubscribe}>
               <Copy className="mr-2 h-4 w-4" />
               复制订阅链接
@@ -224,7 +227,7 @@ export default function SubscriptionPage() {
           </CardTitle>
           <CardDescription>流量将在每月第 {subscription.reset_day ?? "-"} 天自动重置</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-lg border bg-card p-4">
             <p className="text-sm text-muted-foreground">下次重置</p>
             <p className="text-lg font-semibold">
@@ -239,7 +242,9 @@ export default function SubscriptionPage() {
           </div>
           <div className="rounded-lg border bg-card p-4">
             <p className="text-sm text-muted-foreground">订阅 Token</p>
-            <Input readOnly value={subscription.token} className="font-mono text-xs" />
+            <div className="break-all rounded-md border border-dashed bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
+              {subscription.token}
+            </div>
           </div>
         </CardContent>
       </Card>
