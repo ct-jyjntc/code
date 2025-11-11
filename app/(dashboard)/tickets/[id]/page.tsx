@@ -11,6 +11,7 @@ import { MessageSquare, Send, ArrowLeft, User, XCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getErrorMessage } from "@/lib/errors"
 
 interface Message {
   id: string
@@ -51,7 +52,7 @@ export default function TicketDetailPage() {
       console.error("[v0] Failed to fetch ticket detail:", error)
       toast({
         title: "加载失败",
-        description: "无法加载工单详情，请稍后重试",
+        description: getErrorMessage(error, "无法加载工单详情，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -81,7 +82,7 @@ export default function TicketDetailPage() {
       console.error("[v0] Failed to reply to ticket:", error)
       toast({
         title: "回复失败",
-        description: "无法发送回复，请稍后重试",
+        description: getErrorMessage(error, "无法发送回复，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -102,7 +103,7 @@ export default function TicketDetailPage() {
       console.error("[v0] Failed to close ticket:", error)
       toast({
         title: "关闭失败",
-        description: "无法关闭该工单，请稍后重试",
+        description: getErrorMessage(error, "无法关闭该工单，请稍后重试"),
         variant: "destructive",
       })
     } finally {

@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getErrorMessage } from "@/lib/errors"
 
 interface Ticket {
   id: string
@@ -56,7 +57,7 @@ export default function TicketsPage() {
       console.error("[v0] Failed to fetch tickets:", error)
       toast({
         title: "加载失败",
-        description: "无法加载工单信息，请稍后重试",
+        description: getErrorMessage(error, "无法加载工单信息，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -89,7 +90,7 @@ export default function TicketsPage() {
       console.error("[v0] Failed to create ticket:", error)
       toast({
         title: "创建失败",
-        description: "无法创建工单，请稍后重试",
+        description: getErrorMessage(error, "无法创建工单，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -109,7 +110,7 @@ export default function TicketsPage() {
       console.error("[v0] Failed to close ticket:", error)
       toast({
         title: "关闭失败",
-        description: "无法关闭该工单，请稍后重试",
+        description: getErrorMessage(error, "无法关闭该工单，请稍后重试"),
         variant: "destructive",
       })
     }

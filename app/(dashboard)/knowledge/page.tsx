@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
+import { getErrorMessage } from "@/lib/errors"
 
 interface KnowledgeArticle {
   id: string
@@ -63,7 +64,7 @@ export default function KnowledgePage() {
         console.error("Failed to load knowledge base:", error)
         toast({
           title: "加载失败",
-          description: "无法获取知识库，请稍后重试。",
+          description: getErrorMessage(error, "无法获取知识库，请稍后重试。"),
           variant: "destructive",
         })
       } finally {

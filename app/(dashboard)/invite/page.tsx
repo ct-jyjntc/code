@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Users, Copy, Plus, Gift, TrendingUp, ArrowRightLeft, Wallet } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { getErrorMessage } from "@/lib/errors"
 
 interface Invite {
   id: string
@@ -73,7 +74,7 @@ export default function InvitePage() {
       console.error("[v0] Failed to fetch invites:", error)
       toast({
         title: "加载失败",
-        description: "无法加载邀请信息，请稍后重试",
+        description: getErrorMessage(error, "无法加载邀请信息，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -91,6 +92,11 @@ export default function InvitePage() {
       }
     } catch (error) {
       console.error("[v0] Failed to fetch withdraw config:", error)
+      toast({
+        title: "配置加载失败",
+        description: getErrorMessage(error, "无法加载提现配置，请稍后再试"),
+        variant: "destructive",
+      })
     }
   }
 
@@ -107,7 +113,7 @@ export default function InvitePage() {
       console.error("[v0] Failed to generate invite code:", error)
       toast({
         title: "生成失败",
-        description: "无法生成邀请码，请稍后重试",
+        description: getErrorMessage(error, "无法生成邀请码，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -156,7 +162,7 @@ export default function InvitePage() {
       console.error("[v0] Failed to transfer commission:", error)
       toast({
         title: "划转失败",
-        description: "请稍后重试",
+        description: getErrorMessage(error, "请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -193,7 +199,7 @@ export default function InvitePage() {
       console.error("[v0] Failed to submit withdraw:", error)
       toast({
         title: "提交失败",
-        description: "请稍后重试或联系管理员",
+        description: getErrorMessage(error, "请稍后重试或联系管理员"),
         variant: "destructive",
       })
     } finally {

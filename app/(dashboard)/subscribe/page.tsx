@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { getErrorMessage } from "@/lib/errors"
 
 interface PlanPeriod {
   legacyKey: string
@@ -53,6 +54,7 @@ export default function SubscribePage() {
   const [purchasing, setPurchasing] = useState<string | null>(null)
   const [selectedPeriods, setSelectedPeriods] = useState<Record<string, string>>({})
   const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null)
+  const [errorDialog, setErrorDialog] = useState<{ title: string; description: string } | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -71,7 +73,7 @@ export default function SubscribePage() {
         console.error("[v0] Failed to fetch plans:", error)
         toast({
           title: "加载失败",
-          description: "无法加载套餐信息，请稍后重试",
+          description: getErrorMessage(error, "无法加载套餐信息，请稍后重试"),
           variant: "destructive",
         })
       } finally {
@@ -110,10 +112,9 @@ export default function SubscribePage() {
       })
     } catch (error) {
       console.error("[v0] Failed to create order:", error)
-      toast({
+      setErrorDialog({
         title: "购买失败",
-        description: "无法创建订单，请稍后重试",
-        variant: "destructive",
+        description: getErrorMessage(error, "无法创建订单，请稍后重试"),
       })
     } finally {
       setPurchasing(null)
@@ -319,6 +320,23 @@ export default function SubscribePage() {
             >
               前往订单
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(errorDialog)}
+        onOpenChange={(open) => {
+          if (!open) setErrorDialog(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{errorDialog?.title ?? "操作提示"}</DialogTitle>
+            <DialogDescription>{errorDialog?.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setErrorDialog(null)}>知道了</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

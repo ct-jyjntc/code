@@ -7,6 +7,7 @@ import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Server, Globe } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { getErrorMessage } from "@/lib/errors"
 
 interface Node {
   id: string
@@ -29,7 +30,7 @@ export default function NodesPage() {
         console.error("[v0] Failed to fetch nodes:", error)
         toast({
           title: "加载失败",
-          description: "无法加载节点信息，请稍后重试",
+          description: getErrorMessage(error, "无法加载节点信息，请稍后重试"),
           variant: "destructive",
         })
       } finally {

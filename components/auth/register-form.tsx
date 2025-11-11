@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { api } from "@/lib/api"
 import { setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
+import { getErrorMessage } from "@/lib/errors"
 
 export function RegisterForm() {
   const [email, setEmail] = useState("")
@@ -50,7 +51,7 @@ export function RegisterForm() {
     } catch (error) {
       toast({
         title: "注册失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
+        description: getErrorMessage(error, "请稍后重试"),
         variant: "destructive",
       })
     } finally {

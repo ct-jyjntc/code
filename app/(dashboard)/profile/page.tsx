@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { User, Mail, Calendar, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getErrorMessage } from "@/lib/errors"
 
 interface UserInfo {
   id: string
@@ -33,7 +34,7 @@ export default function ProfilePage() {
         console.error("[v0] Failed to fetch user info:", error)
         toast({
           title: "加载失败",
-          description: "无法加载用户信息，请稍后重试",
+          description: getErrorMessage(error, "无法加载用户信息，请稍后重试"),
           variant: "destructive",
         })
       } finally {

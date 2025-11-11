@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { api } from "@/lib/api"
 import { setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
+import { getErrorMessage } from "@/lib/errors"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -37,7 +38,7 @@ export function LoginForm() {
     } catch (error) {
       toast({
         title: "登录失败",
-        description: error instanceof Error ? error.message : "请检查您的凭据",
+        description: getErrorMessage(error, "请检查您的凭据"),
         variant: "destructive",
       })
     } finally {

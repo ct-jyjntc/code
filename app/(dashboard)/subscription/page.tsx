@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { Copy, RefreshCw, ShieldCheck, TimerReset } from "lucide-react"
+import { getErrorMessage } from "@/lib/errors"
 
 interface SubscriptionInfo {
   token: string
@@ -47,7 +48,7 @@ export default function SubscriptionPage() {
         console.error("Failed to fetch subscription info:", error)
         toast({
           title: "加载失败",
-          description: "无法获取订阅信息，请稍后重试。",
+          description: getErrorMessage(error, "无法获取订阅信息，请稍后重试。"),
           variant: "destructive",
         })
       } finally {
@@ -93,7 +94,7 @@ export default function SubscriptionPage() {
       console.error("Failed to reset security:", error)
       toast({
         title: "操作失败",
-        description: "无法重置，请稍后重试。",
+        description: getErrorMessage(error, "无法重置，请稍后重试。"),
         variant: "destructive",
       })
     } finally {

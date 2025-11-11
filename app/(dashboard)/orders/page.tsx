@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { ShoppingCart, Calendar, DollarSign, Package, CreditCard, RefreshCw, CheckCircle } from "lucide-react"
+import { getErrorMessage } from "@/lib/errors"
 
 interface Order {
   id: string
@@ -101,7 +102,7 @@ export default function OrdersPage() {
         console.error("Failed to fetch orders:", error)
         toast({
           title: "加载失败",
-          description: "无法加载订单信息，请稍后重试",
+          description: getErrorMessage(error, "无法加载订单信息，请稍后重试"),
           variant: "destructive",
         })
       } finally {
@@ -166,7 +167,7 @@ export default function OrdersPage() {
       console.error("Failed to load order detail:", error)
       toast({
         title: "加载失败",
-        description: "无法加载订单详情，请稍后再试",
+        description: getErrorMessage(error, "无法加载订单详情，请稍后再试"),
         variant: "destructive",
       })
       handleCloseDialog()
@@ -211,7 +212,7 @@ export default function OrdersPage() {
       console.error("Checkout failed:", error)
       toast({
         title: "拉起支付失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
+        description: getErrorMessage(error, "请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -241,7 +242,7 @@ export default function OrdersPage() {
       console.error("Check status failed:", error)
       toast({
         title: "查询失败",
-        description: "无法获取订单状态，请稍后重试",
+        description: getErrorMessage(error, "无法获取订单状态，请稍后重试"),
         variant: "destructive",
       })
     } finally {
@@ -264,7 +265,7 @@ export default function OrdersPage() {
       console.error("Cancel order failed:", error)
       toast({
         title: "取消失败",
-        description: "无法取消该订单，请稍后重试",
+        description: getErrorMessage(error, "无法取消该订单，请稍后重试"),
         variant: "destructive",
       })
     } finally {

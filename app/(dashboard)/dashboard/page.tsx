@@ -17,6 +17,8 @@ import { Server, Activity, CreditCard, Sparkles, BookOpen } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
+import { useToast } from "@/hooks/use-toast"
+import { getErrorMessage } from "@/lib/errors"
 
 interface DashboardStats {
   total_bandwidth: number
@@ -36,6 +38,7 @@ export default function DashboardPage() {
   const [announcements, setAnnouncements] = useState<Array<{ id: string; title: string; description: string; detail: string }>>([])
   const [announcementsLoading, setAnnouncementsLoading] = useState(true)
   const hasStats = Boolean(stats && stats.total_bandwidth)
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -44,6 +47,11 @@ export default function DashboardPage() {
         setStats(data)
       } catch (error) {
         console.error("[v0] Failed to fetch dashboard stats:", error)
+        toast({
+          title: "加载失败",
+          description: getErrorMessage(error, "无法获取仪表盘数据，请稍后重试"),
+          variant: "destructive",
+        })
       } finally {
         setLoading(false)
       }
@@ -63,6 +71,11 @@ export default function DashboardPage() {
         )
       } catch (error) {
         console.error("Failed to fetch announcements:", error)
+        toast({
+          title: "公告获取失败",
+          description: getErrorMessage(error, "无法加载站点公告"),
+          variant: "destructive",
+        })
       } finally {
         setAnnouncementsLoading(false)
       }
@@ -70,7 +83,7 @@ export default function DashboardPage() {
 
     fetchStats()
     fetchNotices()
-  }, [])
+  }, [toast])
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B"

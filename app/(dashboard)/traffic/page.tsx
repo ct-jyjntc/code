@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Activity, TrendingUp, TrendingDown, Calendar } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { getErrorMessage } from "@/lib/errors"
 
 interface TrafficLog {
   id: string
@@ -40,7 +41,7 @@ export default function TrafficPage() {
         console.error("Failed to fetch traffic log:", error)
         toast({
           title: "加载失败",
-          description: "无法加载流量明细，请稍后重试",
+          description: getErrorMessage(error, "无法加载流量明细，请稍后重试"),
           variant: "destructive",
         })
       } finally {
