@@ -120,7 +120,7 @@ export default function DashboardPage() {
       icon: Sparkles,
       iconBg: "bg-secondary",
       iconColor: "text-secondary-foreground",
-      href: "/subscribe",
+      href: "/subscription",
     },
   ]
 
@@ -261,7 +261,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-7">
+        <Card className="lg:col-span-7 cursor-pointer" onClick={() => router.push("/subscription")}>
           <CardHeader>
             <CardTitle>我的订阅</CardTitle>
             <CardDescription>查看当前套餐与流量使用情况</CardDescription>

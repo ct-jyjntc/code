@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
-import { Copy, RefreshCw, ShieldCheck, Link2, TimerReset } from "lucide-react"
+import { Copy, RefreshCw, ShieldCheck, TimerReset } from "lucide-react"
 
 interface SubscriptionInfo {
   token: string
@@ -35,7 +35,7 @@ interface SubscriptionInfo {
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null)
   const [loading, setLoading] = useState(true)
-  const [action, setAction] = useState<"reset" | "quick">()
+  const [action, setAction] = useState<"reset">()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -94,24 +94,6 @@ export default function SubscriptionPage() {
       toast({
         title: "操作失败",
         description: "无法重置，请稍后重试。",
-        variant: "destructive",
-      })
-    } finally {
-      setAction(undefined)
-    }
-  }
-
-  const handleQuickLogin = async () => {
-    setAction("quick")
-    try {
-      const data = await api.getQuickLoginUrl()
-      await navigator.clipboard.writeText(data.url)
-      toast({ title: "已生成", description: "快速登录链接已复制到剪贴板" })
-    } catch (error) {
-      console.error("Failed to get quick login url:", error)
-      toast({
-        title: "操作失败",
-        description: "无法生成快速登录链接，请稍后重试。",
         variant: "destructive",
       })
     } finally {
@@ -228,10 +210,6 @@ export default function SubscriptionPage() {
             <Button className="w-full" onClick={handleResetSecurity} disabled={action === "reset"}>
               <RefreshCw className="mr-2 h-4 w-4 animate-spin" aria-hidden={action !== "reset"} />
               重新生成链接
-            </Button>
-            <Button className="w-full" variant="outline" onClick={handleQuickLogin} disabled={action === "quick"}>
-              <Link2 className="mr-2 h-4 w-4" />
-              一键获取快速登录
             </Button>
           </CardContent>
         </Card>
