@@ -201,69 +201,27 @@ export const mockNodes = [
 ]
 
 export const mockInvites = {
-  stats: {
-    total_invites: 8,
-    commission_earned: 128.5,
-    commission_rate: 0.2,
-  },
-  invite_code: "DEMO2024",
-  invite_url: "https://seelecloud.com/register?code=DEMO2024",
-  invites: [
+  stat: [12, 128500, 2350, 20, 65800],
+  codes: [
     {
-      id: "invite_1",
-      email: "user1@example.com",
-      registered_at: "2024-11-15T10:20:00.000Z",
-      commission: 7.99,
-      status: "active",
+      code: "DEMO2024",
+      status: 0,
+      created_at: "2024-11-15T10:20:00.000Z",
     },
     {
-      id: "invite_2",
-      email: "user2@example.com",
-      registered_at: "2024-11-20T14:35:00.000Z",
-      commission: 15.98,
-      status: "active",
+      code: "DEMO2025",
+      status: 1,
+      created_at: "2024-11-20T14:35:00.000Z",
     },
     {
-      id: "invite_3",
-      email: "user3@example.com",
-      registered_at: "2024-12-01T09:10:00.000Z",
-      commission: 31.96,
-      status: "active",
+      code: "DEMO2026",
+      status: 0,
+      created_at: "2024-12-01T09:10:00.000Z",
     },
     {
-      id: "invite_4",
-      email: "user4@example.com",
-      registered_at: "2024-12-05T16:45:00.000Z",
-      commission: 15.98,
-      status: "active",
-    },
-    {
-      id: "invite_5",
-      email: "user5@example.com",
-      registered_at: "2024-12-10T11:30:00.000Z",
-      commission: 7.99,
-      status: "active",
-    },
-    {
-      id: "invite_6",
-      email: "user6@example.com",
-      registered_at: "2024-12-15T13:20:00.000Z",
-      commission: 15.98,
-      status: "expired",
-    },
-    {
-      id: "invite_7",
-      email: "user7@example.com",
-      registered_at: "2024-12-20T10:15:00.000Z",
-      commission: 7.99,
-      status: "active",
-    },
-    {
-      id: "invite_8",
-      email: "user8@example.com",
-      registered_at: "2025-01-08T15:40:00.000Z",
-      commission: 24.63,
-      status: "active",
+      code: "DEMO2027",
+      status: 0,
+      created_at: "2024-12-05T16:45:00.000Z",
     },
   ],
 }

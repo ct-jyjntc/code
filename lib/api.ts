@@ -305,6 +305,12 @@ const normalizePaymentMethod = (method: any) => ({
 const normalizeInviteResponse = (data: any) => {
   const codes = ensureArray<any>(data?.codes)
   const stats = Array.isArray(data?.stat) ? data.stat : []
+  const registeredUsers = stats[0] ?? codes.length
+  const commissionEarnedRaw = stats[1] ?? 0
+  const pendingCommissionRaw = stats[2] ?? 0
+  const commissionRate = stats[3] ?? 0
+  const availableCommissionRaw = stats[4] ?? 0
+
   return {
     invites: codes.map((code) => ({
       id: `${code?.code ?? ""}`,
@@ -312,9 +318,13 @@ const normalizeInviteResponse = (data: any) => {
       created_at: normalizeTimestamp(code?.created_at) ?? new Date().toISOString(),
       status: code?.status === 0 ? "active" : "used",
     })),
-    total_invites: stats[0] ?? codes.length,
+    total_invites: registeredUsers,
     active_invites: codes.filter((code) => code?.status === 0).length,
-    commission_earned: centsToCurrency(stats[1] ?? 0),
+    commission_earned: centsToCurrency(commissionEarnedRaw),
+    pending_commission: centsToCurrency(pendingCommissionRaw),
+    commission_rate: commissionRate,
+    available_commission: centsToCurrency(availableCommissionRaw),
+    available_commission_raw: availableCommissionRaw,
   }
 }
 
@@ -607,6 +617,25 @@ export const api = {
     return fetchWithAuth("/user/invite/save")
   },
 
+  transferCommission: async (amount: number) => {
+    if (USE_MOCK_DATA) return { success: true }
+    return fetchWithAuth("/user/transfer", {
+      method: "POST",
+      body: { transfer_amount: amount },
+    })
+  },
+
+  withdrawCommission: async (method: string, account: string) => {
+    if (USE_MOCK_DATA) return { success: true }
+    return fetchWithAuth("/user/ticket/withdraw", {
+      method: "POST",
+      body: {
+        withdraw_method: method,
+        withdraw_account: account,
+      },
+    })
+  },
+
   // Tickets
   getTickets: async () => {
     if (USE_MOCK_DATA) return mockTickets
@@ -726,5 +755,16 @@ export const api = {
   getGiftCardHistory: async () => {
     if (USE_MOCK_DATA) return mockGiftCardHistory
     return fetchWithAuth("/user/gift-card/history")
+  },
+
+  getCommConfig: async () => {
+    if (USE_MOCK_DATA) {
+      return {
+        withdraw_methods: ["支付宝", "USDT-TRC20"],
+        withdraw_close: 0,
+        currency_symbol: "¥",
+      }
+    }
+    return fetchWithAuth("/user/comm/config")
   },
 }

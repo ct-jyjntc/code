@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Users, Copy, Plus, Gift, TrendingUp } from "lucide-react"
+import { Users, Copy, Plus, Gift, TrendingUp, ArrowRightLeft, Wallet } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
@@ -21,6 +24,10 @@ interface InviteStats {
   total_invites: number
   active_invites: number
   commission_earned: number
+  pending_commission: number
+  available_commission: number
+  available_commission_raw: number
+  commission_rate: number
 }
 
 export default function InvitePage() {
@@ -29,13 +36,24 @@ export default function InvitePage() {
     total_invites: 0,
     active_invites: 0,
     commission_earned: 0,
+    pending_commission: 0,
+    available_commission: 0,
+    available_commission_raw: 0,
+    commission_rate: 0,
   })
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [transferAmount, setTransferAmount] = useState("")
+  const [transferring, setTransferring] = useState(false)
+  const [withdrawMethods, setWithdrawMethods] = useState<string[]>([])
+  const [withdrawMethod, setWithdrawMethod] = useState("")
+  const [withdrawAccount, setWithdrawAccount] = useState("")
+  const [withdrawing, setWithdrawing] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
     fetchInvites()
+    fetchWithdrawConfig()
   }, [])
 
   const fetchInvites = async () => {
@@ -46,6 +64,10 @@ export default function InvitePage() {
         total_invites: data.total_invites || 0,
         active_invites: data.active_invites || 0,
         commission_earned: data.commission_earned || 0,
+        pending_commission: data.pending_commission || 0,
+        available_commission: data.available_commission || 0,
+        available_commission_raw: data.available_commission_raw || 0,
+        commission_rate: data.commission_rate || 0,
       })
     } catch (error) {
       console.error("[v0] Failed to fetch invites:", error)
@@ -56,6 +78,19 @@ export default function InvitePage() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchWithdrawConfig = async () => {
+    try {
+      const config = await api.getCommConfig()
+      const methods = Array.isArray(config?.withdraw_methods) ? config.withdraw_methods : []
+      setWithdrawMethods(methods)
+      if (methods.length > 0) {
+        setWithdrawMethod(methods[0])
+      }
+    } catch (error) {
+      console.error("[v0] Failed to fetch withdraw config:", error)
     }
   }
 
@@ -87,6 +122,83 @@ export default function InvitePage() {
       title: "复制成功",
       description: "邀请链接已复制到剪贴板",
     })
+  }
+
+  const handleTransfer = async () => {
+    const numericAmount = parseFloat(transferAmount)
+    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+      toast({
+        title: "金额有误",
+        description: "请输入正确的划转金额",
+        variant: "destructive",
+      })
+      return
+    }
+    const amountInCents = Math.round(numericAmount * 100)
+    if (amountInCents > stats.available_commission_raw) {
+      toast({
+        title: "余额不足",
+        description: "划转金额不能超过可用佣金",
+        variant: "destructive",
+      })
+      return
+    }
+    setTransferring(true)
+    try {
+      await api.transferCommission(amountInCents)
+      toast({
+        title: "划转成功",
+        description: "佣金已转入账户余额",
+      })
+      setTransferAmount("")
+      await fetchInvites()
+    } catch (error) {
+      console.error("[v0] Failed to transfer commission:", error)
+      toast({
+        title: "划转失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      })
+    } finally {
+      setTransferring(false)
+    }
+  }
+
+  const handleWithdraw = async () => {
+    if (!withdrawMethod) {
+      toast({
+        title: "请选择提现方式",
+        variant: "destructive",
+      })
+      return
+    }
+    if (!withdrawAccount.trim()) {
+      toast({
+        title: "请填写收款信息",
+        description: "请输入提现账号或备注信息",
+        variant: "destructive",
+      })
+      return
+    }
+    setWithdrawing(true)
+    try {
+      await api.withdrawCommission(withdrawMethod, withdrawAccount.trim())
+      toast({
+        title: "提现申请已提交",
+        description: "系统已创建工单，请等待客服处理",
+      })
+      setWithdrawAccount("")
+      await fetchInvites()
+    } catch (error) {
+      console.error("[v0] Failed to submit withdraw:", error)
+      toast({
+        title: "提交失败",
+        description: "请稍后重试或联系管理员",
+        variant: "destructive",
+      })
+    } finally {
+      setWithdrawing(false)
+    }
   }
 
   if (loading) {
@@ -151,12 +263,101 @@ export default function InvitePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">累计返佣</CardTitle>
+            <CardTitle className="text-sm font-medium">佣金概览</CardTitle>
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">¥{stats.commission_earned.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">总收益</p>
+          <CardContent className="space-y-2">
+            <div>
+              <div className="text-2xl font-bold">¥{stats.available_commission.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">可用佣金</p>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              累计返佣 ¥{stats.commission_earned.toFixed(2)} · 待确认 ¥
+              {stats.pending_commission.toFixed(2)} · 返佣比例 {stats.commission_rate}%
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowRightLeft className="h-5 w-5" />
+              划转至账户余额
+            </CardTitle>
+            <CardDescription>将可用佣金划转为账户余额，用于购买套餐</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              当前可划转：<span className="font-semibold text-foreground">¥{stats.available_commission.toFixed(2)}</span>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="transfer-amount">划转金额（¥）</Label>
+              <Input
+                id="transfer-amount"
+                type="number"
+                inputMode="decimal"
+                placeholder="例如 50"
+                min="0"
+                step="0.01"
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+              />
+            </div>
+            <Button className="w-full sm:w-auto" onClick={handleTransfer} disabled={transferring}>
+              {transferring ? "划转中..." : "确认划转"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5" />
+              推广佣金提现
+            </CardTitle>
+            <CardDescription>提交提现申请，系统会自动创建工单</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>提现方式</Label>
+              {withdrawMethods.length === 0 ? (
+                <p className="text-xs text-muted-foreground">暂无可用提现方式，请联系管理员</p>
+              ) : (
+                <Select value={withdrawMethod} onValueChange={setWithdrawMethod}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择提现方式" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {withdrawMethods.map((method) => (
+                      <SelectItem key={method} value={method}>
+                        {method}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="withdraw-account">收款账号 / 备注</Label>
+              <Input
+                id="withdraw-account"
+                placeholder="请输入收款账号或备注信息"
+                value={withdrawAccount}
+                onChange={(e) => setWithdrawAccount(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={handleWithdraw}
+              disabled={withdrawing || withdrawMethods.length === 0}
+            >
+              {withdrawing ? "提交中..." : "提交提现申请"}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              提交后系统会创建工单，请等待客服审核处理。
+            </p>
           </CardContent>
         </Card>
       </div>
