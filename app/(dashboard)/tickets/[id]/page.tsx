@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { MessageSquare, Send, ArrowLeft, User, XCircle } from "lucide-react"
+import { MessageSquare, Send, ArrowLeft, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getErrorMessage } from "@/lib/errors"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
 
 interface Message {
   id: string
@@ -60,7 +62,18 @@ export default function TicketDetailPage() {
     }
   }
 
+  const lastMessage = ticket?.messages?.[ticket.messages.length - 1]
+  const awaitingSupportReply = Boolean(ticket && ticket.messages.length > 0 && lastMessage && !lastMessage.is_admin)
+
   const handleReply = async () => {
+    if (awaitingSupportReply) {
+      toast({
+        title: "请等待客服回复",
+        description: "客服回复前暂时无法继续发送新消息。",
+        variant: "destructive",
+      })
+      return
+    }
     if (!reply.trim()) {
       toast({
         title: "请输入回复内容",
@@ -80,9 +93,10 @@ export default function TicketDetailPage() {
       await fetchTicketDetail()
     } catch (error) {
       console.error("[v0] Failed to reply to ticket:", error)
+      const message = getErrorMessage(error, "无法发送回复，请稍后重试")
       toast({
         title: "回复失败",
-        description: getErrorMessage(error, "无法发送回复，请稍后重试"),
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -193,8 +207,7 @@ export default function TicketDetailPage() {
                   className={`p-3 ${message.is_admin ? "bg-muted" : "bg-primary text-primary-foreground"}`}
                   style={{ maxWidth: "80%" }}
                 >
-                  <p className="text-sm font-medium">{message.is_admin ? message.sender_name || "客服" : "您"}</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm">{message.message}</p>
+                  <p className="whitespace-pre-wrap text-sm">{message.message}</p>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {new Date(message.created_at).toLocaleString("zh-CN")}
@@ -215,11 +228,31 @@ export default function TicketDetailPage() {
             <CardTitle className="text-base">添加回复</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea placeholder="输入您的回复..." rows={4} value={reply} onChange={(e) => setReply(e.target.value)} />
+            {awaitingSupportReply && (
+              <Alert>
+                <AlertDescription>客服尚未回复，请耐心等待，期间无法发送新的消息。</AlertDescription>
+              </Alert>
+            )}
+            <Textarea
+              placeholder="输入您的回复..."
+              rows={4}
+              value={reply}
+              onChange={(e) => setReply(e.target.value)}
+              disabled={awaitingSupportReply || sending}
+            />
             <div className="flex justify-end">
-              <Button onClick={handleReply} disabled={sending}>
-                <Send className="mr-2 h-4 w-4" />
-                {sending ? "发送中..." : "发送回复"}
+              <Button onClick={handleReply} disabled={sending || awaitingSupportReply}>
+                {sending ? (
+                  <span className="flex items-center gap-2">
+                    <Spinner className="size-4" />
+                    发送中...
+                  </span>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    发送回复
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
