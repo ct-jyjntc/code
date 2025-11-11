@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
-import { Copy, RefreshCw, ShieldCheck, Link2, Laptop2, Trash2, TimerReset } from "lucide-react"
+import { Copy, RefreshCw, ShieldCheck, Link2, TimerReset } from "lucide-react"
 
 interface SubscriptionInfo {
   token: string
@@ -32,28 +32,17 @@ interface SubscriptionInfo {
   remarks?: string
 }
 
-interface SessionInfo {
-  id: string
-  device: string
-  ip: string
-  location?: string
-  user_agent?: string
-  last_active_at: string
-}
-
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null)
-  const [sessions, setSessions] = useState<SessionInfo[]>([])
   const [loading, setLoading] = useState(true)
-  const [action, setAction] = useState<"reset" | "quick" | "session">()
+  const [action, setAction] = useState<"reset" | "quick">()
   const { toast } = useToast()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [subInfo, sessionData] = await Promise.all([api.getSubscriptionInfo(), api.getActiveSessions()])
+        const subInfo = await api.getSubscriptionInfo()
         setSubscription(subInfo)
-        setSessions(sessionData.sessions || [])
       } catch (error) {
         console.error("Failed to fetch subscription info:", error)
         toast({
@@ -79,6 +68,7 @@ export default function SubscriptionPage() {
   }, [subscription])
 
   const effectiveSpeedLimit = subscription?.plan?.speed_limit ?? subscription?.speed_limit ?? null
+  const effectiveDeviceLimit = subscription?.plan?.device_limit ?? subscription?.device_limit ?? null
 
   const formatBytes = (bytes: number) => {
     if (!bytes) return "0 B"
@@ -122,24 +112,6 @@ export default function SubscriptionPage() {
       toast({
         title: "操作失败",
         description: "无法生成快速登录链接，请稍后重试。",
-        variant: "destructive",
-      })
-    } finally {
-      setAction(undefined)
-    }
-  }
-
-  const handleRemoveSession = async (sessionId: string) => {
-    setAction("session")
-    try {
-      await api.removeActiveSession(sessionId)
-      setSessions((prev) => prev.filter((s) => s.id !== sessionId))
-      toast({ title: "已移除", description: "该会话已被注销" })
-    } catch (error) {
-      console.error("Failed to remove session:", error)
-      toast({
-        title: "操作失败",
-        description: "无法移除该会话，请稍后重试。",
         variant: "destructive",
       })
     } finally {
@@ -230,7 +202,7 @@ export default function SubscriptionPage() {
                   {effectiveSpeedLimit ? `${effectiveSpeedLimit} Mbps` : "不限速"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  设备上限 {subscription.plan?.device_limit ?? subscription.device_limit ?? "--"} 台
+                  {typeof effectiveDeviceLimit === "number" ? `设备上限 ${effectiveDeviceLimit} 台` : "不限制设备上限"}
                 </p>
               </div>
             </div>
@@ -293,51 +265,6 @@ export default function SubscriptionPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Laptop2 className="h-5 w-5 text-primary" />
-            活跃会话
-          </CardTitle>
-          <CardDescription>确保只有自己使用，随时注销陌生设备</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {sessions.length === 0 ? (
-            <div className="flex min-h-[160px] flex-col items-center justify-center text-sm text-muted-foreground">
-              暂无活跃会话
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-medium">{session.device}</p>
-                    <p className="text-sm text-muted-foreground">
-                      IP：{session.ip} · {session.location || "未知地区"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      最近活跃：{new Date(session.last_active_at).toLocaleString("zh-CN")}
-                    </p>
-                    {session.user_agent && <p className="text-xs text-muted-foreground">{session.user_agent}</p>}
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="sm:w-auto"
-                    onClick={() => handleRemoveSession(session.id)}
-                    disabled={action === "session"}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    注销
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

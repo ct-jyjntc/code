@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Server, Activity, CreditCard, Calendar, Sparkles } from "lucide-react"
+import { Server, Activity, CreditCard, Sparkles } from "lucide-react"
 
 interface DashboardStats {
   total_bandwidth: number
@@ -314,30 +314,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-        {stats?.expire_date && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              订阅信息
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">当前套餐</p>
-                <p className="text-lg font-semibold">{planName}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">到期时间</p>
-                <p className="text-lg font-semibold">{new Date(stats.expire_date).toLocaleDateString("zh-CN")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       </div>
 
       <Dialog open={detailIndex !== null} onOpenChange={(open) => !open && setDetailIndex(null)}>
