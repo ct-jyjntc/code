@@ -96,7 +96,7 @@ export default function DashboardPage() {
   const usagePercentage = hasStats ? Math.round((stats!.used_bandwidth / (stats!.total_bandwidth || 1)) * 100) : 0
   const expireDateText = stats?.expire_date ? new Date(stats.expire_date).toLocaleDateString("zh-CN") : null
   const planName = stats?.plan_name || "未订阅"
-  const expireDisplay = expireDateText || "—"
+  const expireDisplay = expireDateText || "长期有效"
   const usedText = hasStats ? formatBytes(stats!.used_bandwidth) : "—"
   const totalText = hasStats ? formatBytes(stats!.total_bandwidth) : "—"
   const usageLabel = hasStats ? `${usagePercentage}%` : "--"
