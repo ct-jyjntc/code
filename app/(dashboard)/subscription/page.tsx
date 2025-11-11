@@ -93,15 +93,7 @@ export default function SubscriptionPage() {
     setAction("reset")
     try {
       const data = await api.resetSecurity()
-      setSubscription((prev) =>
-        prev
-          ? {
-              ...prev,
-              subscribe_url: data.subscribe_url,
-              token: data.token,
-            }
-          : prev,
-      )
+      setSubscription(data)
       toast({ title: "重置成功", description: "已重新生成订阅链接和安全凭据" })
     } catch (error) {
       console.error("Failed to reset security:", error)

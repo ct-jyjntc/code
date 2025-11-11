@@ -11,8 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { api } from "@/lib/api"
 import { setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { InfoIcon } from "lucide-react"
 
 export function RegisterForm() {
   const [email, setEmail] = useState("")
@@ -40,7 +38,10 @@ export function RegisterForm() {
 
     try {
       const response = await api.register(email, password, username, inviteCode || undefined)
-      setAuthToken(response.token)
+      if (!response?.auth_data) {
+        throw new Error("注册响应异常，请稍后再试")
+      }
+      setAuthToken(response.auth_data)
       toast({
         title: "注册成功",
         description: "欢迎加入！",
@@ -61,16 +62,9 @@ export function RegisterForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl">注册</CardTitle>
-        <CardDescription>创建一个新帐户以开始使用</CardDescription>
+        <CardDescription>创建一个新账户以开始使用</CardDescription>
       </CardHeader>
       <CardContent>
-        <Alert className="mb-4 border-blue-500/50 bg-blue-500/10">
-          <InfoIcon className="h-4 w-4 text-blue-500" />
-          <AlertDescription className="text-sm text-blue-300">
-            演示模式：填写任意信息即可注册并查看界面
-          </AlertDescription>
-        </Alert>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username">用户名</Label>

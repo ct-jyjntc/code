@@ -15,9 +15,11 @@ interface Plan {
   name: string
   price: number
   duration_days: number
+  duration_label?: string
   bandwidth: number
   features: string[]
   popular?: boolean
+  purchase_period?: string
 }
 
 export default function SubscribePage() {
@@ -47,10 +49,10 @@ export default function SubscribePage() {
     fetchPlans()
   }, [toast])
 
-  const handlePurchase = async (planId: string) => {
+  const handlePurchase = async (planId: string, period?: string) => {
     setPurchasing(planId)
     try {
-      await api.createOrder(planId)
+      await api.createOrder(planId, period)
       toast({
         title: "购买成功",
         description: "订单已创建，请前往订单页面查看",
@@ -131,7 +133,7 @@ export default function SubscribePage() {
                   {plan.popular && <Badge variant="default">热门</Badge>}
                 </div>
                 <CardDescription>
-                  {plan.duration_days} 天 · {formatBytes(plan.bandwidth)}
+                  {(plan.duration_label ?? `${plan.duration_days} 天`)} · {formatBytes(plan.bandwidth)}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -167,7 +169,7 @@ export default function SubscribePage() {
                 <Button
                   className="w-full"
                   variant={plan.popular ? "default" : "outline"}
-                  onClick={() => handlePurchase(plan.id)}
+                  onClick={() => handlePurchase(plan.id, plan.purchase_period)}
                   disabled={purchasing === plan.id}
                 >
                   {purchasing === plan.id ? "处理中..." : "立即购买"}

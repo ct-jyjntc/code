@@ -1,18 +1,7 @@
-export interface User {
-  id: string
-  email: string
-  username: string
-  balance: number
-  transfer_enable: number
-  u: number
-  d: number
-  expired_at: string
-  invite_code?: string
-}
-
 export interface AuthResponse {
-  token: string
-  user: User
+  auth_data: string
+  token?: string
+  is_admin?: boolean
 }
 
 // Token management

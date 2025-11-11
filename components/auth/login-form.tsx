@@ -11,12 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { api } from "@/lib/api"
 import { setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { InfoIcon } from "lucide-react"
 
 export function LoginForm() {
-  const [email, setEmail] = useState("demo@seelecloud.com")
-  const [password, setPassword] = useState("demo123456")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
@@ -27,7 +25,10 @@ export function LoginForm() {
 
     try {
       const response = await api.login(email, password)
-      setAuthToken(response.token)
+      if (!response?.auth_data) {
+        throw new Error("认证信息缺失，请重试")
+      }
+      setAuthToken(response.auth_data)
       toast({
         title: "登录成功",
         description: "欢迎回来！",
@@ -48,16 +49,9 @@ export function LoginForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl">登录</CardTitle>
-        <CardDescription>输入您的凭据以访问您的帐户</CardDescription>
+        <CardDescription>输入您的凭据以访问您的账户</CardDescription>
       </CardHeader>
       <CardContent>
-        <Alert className="mb-4 border-blue-500/50 bg-blue-500/10">
-          <InfoIcon className="h-4 w-4 text-blue-500" />
-          <AlertDescription className="text-sm text-blue-300">
-            演示模式：使用任意邮箱和密码即可登录查看界面
-          </AlertDescription>
-        </Alert>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">邮箱</Label>
