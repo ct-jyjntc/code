@@ -1,4 +1,6 @@
 import { getAuthToken } from "./auth"
+import type { CaptchaPayload } from "@/types/captcha"
+import type { GuestConfig } from "@/types/config"
 import {
   mockAuthResponse,
   mockDashboardStats,
@@ -120,6 +122,17 @@ const safeJsonStringify = (body?: BodyInit | object) => {
   }
   return JSON.stringify(body)
 }
+
+type RegisterPayload = {
+  email: string
+  password: string
+  invite_code?: string
+  email_code?: string
+} & CaptchaPayload
+
+type EmailCodePayload = {
+  email: string
+} & CaptchaPayload
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   if (USE_MOCK_DATA) {
@@ -478,7 +491,21 @@ export const api = {
     })
   },
 
-  register: async (email: string, password: string, _username?: string, invite_code?: string) => {
+  getGuestConfig: async (): Promise<GuestConfig> => {
+    if (USE_MOCK_DATA) {
+      return {
+        is_email_verify: 1,
+        is_invite_force: 0,
+        email_whitelist_suffix: 0,
+        is_captcha: 0,
+        captcha_type: "recaptcha",
+        recaptcha_site_key: "demo",
+      }
+    }
+    return fetchWithAuth("/guest/comm/config")
+  },
+
+  register: async ({ email, password, invite_code, email_code, ...captcha }: RegisterPayload) => {
     if (USE_MOCK_DATA) return mockAuthResponse
     return fetchWithAuth("/passport/auth/register", {
       method: "POST",
@@ -486,7 +513,28 @@ export const api = {
         email,
         password,
         invite_code,
+        email_code,
+        ...captcha,
       },
+    })
+  },
+
+  sendEmailCode: async ({ email, ...captcha }: EmailCodePayload) => {
+    if (USE_MOCK_DATA) return { success: true }
+    return fetchWithAuth("/passport/comm/sendEmailVerify", {
+      method: "POST",
+      body: {
+        email,
+        ...captcha,
+      },
+    })
+  },
+
+  forgetPassword: async (payload: { email: string; password: string; email_code: string }) => {
+    if (USE_MOCK_DATA) return { success: true }
+    return fetchWithAuth("/passport/auth/forget", {
+      method: "POST",
+      body: payload,
     })
   },
 
