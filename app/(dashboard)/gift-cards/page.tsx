@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { api } from "@/lib/api"
 import { Gift, History, Ticket, Info } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface GiftCardCheckResult {
   code_info?: {
@@ -97,7 +99,8 @@ export default function GiftCardsPage() {
     }
     setRedeeming(true)
     try {
-      const data = await api.redeemGiftCard(code.trim())
+      const trimmed = code.trim()
+      const data = await api.redeemGiftCard(trimmed)
       toast({ title: "兑换成功", description: data.message })
       setCheckResult(null)
       setCode("")
@@ -132,33 +135,76 @@ export default function GiftCardsPage() {
             <CardDescription>兑换码区分大小写，请准确输入</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input placeholder="输入礼品卡兑换码" value={code} onChange={(e) => setCode(e.target.value)} />
+            <Input
+              placeholder="输入礼品卡兑换码"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoComplete="off"
+            />
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button className="w-full" variant="secondary" onClick={handleCheck} disabled={checking}>
-                查询兑换信息
+                {checking ? "查询中..." : "查询兑换信息"}
               </Button>
-              <Button className="w-full" onClick={handleRedeem} disabled={redeeming}>
-                立即兑换
+              <Button
+                className="w-full"
+                onClick={handleRedeem}
+                disabled={redeeming || !checkResult?.can_redeem}
+              >
+                {redeeming ? "兑换中..." : "立即兑换"}
               </Button>
             </div>
             {checkResult && (
-              <div className="space-y-3 rounded-lg border bg-muted/40 p-4 text-sm">
-                <p className="font-medium">{checkResult.code_info?.template_name || "未知礼包"}</p>
-                {checkResult.code_info?.expire_at && (
-                  <p>有效期至：{new Date(checkResult.code_info.expire_at).toLocaleString("zh-CN")}</p>
-                )}
-                {checkResult.reward_preview && (
-                  <ul className="list-disc pl-5">
-                    {checkResult.reward_preview.traffic && <li>流量奖励：{checkResult.reward_preview.traffic}</li>}
-                    {checkResult.reward_preview.balance && <li>余额奖励：{checkResult.reward_preview.balance}</li>}
-                    {checkResult.reward_preview.bonus_days && (
-                      <li>额外天数：{checkResult.reward_preview.bonus_days} 天</li>
+              <div className="space-y-4 rounded-lg border bg-muted/40 p-4 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-base font-semibold">{checkResult.code_info?.template_name || "未知礼包"}</p>
+                    {checkResult.code_info?.expire_at && (
+                      <p className="text-xs text-muted-foreground">
+                        有效期至：{new Date(checkResult.code_info.expire_at).toLocaleString("zh-CN")}
+                      </p>
                     )}
-                  </ul>
+                    {checkResult.code_info?.remaining !== undefined && (
+                      <p className="text-xs text-muted-foreground">剩余数量：{checkResult.code_info.remaining}</p>
+                    )}
+                  </div>
+                  <Badge variant={checkResult.can_redeem === false ? "destructive" : "default"}>
+                    {checkResult.can_redeem === false ? "不可兑换" : "可兑换"}
+                  </Badge>
+                </div>
+
+                {checkResult.reward_preview && (
+                  <div className="rounded-md bg-background/70 p-3">
+                    <p className="text-xs font-semibold text-muted-foreground">奖励预览</p>
+                    <ul className="mt-2 list-inside list-disc space-y-1">
+                      {checkResult.reward_preview.traffic && <li>流量奖励：{checkResult.reward_preview.traffic}</li>}
+                      {checkResult.reward_preview.balance && <li>余额奖励：{checkResult.reward_preview.balance}</li>}
+                      {checkResult.reward_preview.bonus_days && (
+                        <li>额外天数：{checkResult.reward_preview.bonus_days} 天</li>
+                      )}
+                    </ul>
+                  </div>
                 )}
+
                 {checkResult.can_redeem === false && (
-                  <p className="text-destructive">当前不可兑换：{checkResult.reason || "未知原因"}</p>
+                  <Alert variant="destructive">
+                    <AlertTitle>当前不可兑换</AlertTitle>
+                    <AlertDescription>{checkResult.reason || "请确认兑换码状态或联系管理员"}</AlertDescription>
+                  </Alert>
                 )}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setCheckResult(null)}>
+                    清除结果
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => code && navigator.clipboard.writeText(code.trim())}
+                  >
+                    复制兑换码
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
