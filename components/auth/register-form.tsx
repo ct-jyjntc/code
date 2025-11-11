@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CaptchaWidget } from "@/components/auth/captcha-widget"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
 import { api } from "@/lib/api"
 import { extractAuthToken, setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
@@ -28,6 +30,7 @@ export function RegisterForm() {
   const [emailCode, setEmailCode] = useState("")
   const [loading, setLoading] = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
   const { config, loading: configLoading, error: configError } = useGuestConfig()
@@ -51,6 +54,11 @@ export function RegisterForm() {
   const shouldResetCaptcha = Boolean(captcha.captchaRequired && config?.captcha_type !== "recaptcha-v3")
   const hasWhitelist = whitelist.length > 0
 
+  const raiseInlineError = (title: string, description?: string) => {
+    setFormError(description ?? title)
+    toast({ title, description, variant: "destructive" })
+  }
+
   const emailValue = hasWhitelist
     ? emailLocal && selectedDomain
       ? `${emailLocal}@${selectedDomain}`
@@ -60,11 +68,11 @@ export function RegisterForm() {
   const validateEmailForWhitelist = () => {
     if (!hasWhitelist) return true
     if (!emailLocal.trim()) {
-      toast({ title: "请输入邮箱前缀", variant: "destructive" })
+      raiseInlineError("请输入邮箱前缀")
       return false
     }
     if (!selectedDomain) {
-      toast({ title: "请选择邮箱域名", variant: "destructive" })
+      raiseInlineError("请选择邮箱域名")
       return false
     }
     return true
@@ -102,8 +110,9 @@ export function RegisterForm() {
   }
 
   const handleSendCode = async () => {
+    setFormError(null)
     if (!emailValue) {
-      toast({ title: "请输入邮箱", variant: "destructive" })
+      raiseInlineError("请输入邮箱")
       return
     }
     if (!validateEmailForWhitelist()) return
@@ -113,11 +122,14 @@ export function RegisterForm() {
       const captchaPayload = await captcha.requestPayload("send_email_code")
       await api.sendEmailCode({ email: emailValue, ...captchaPayload })
       toast({ title: "验证码已发送", description: "请在 5 分钟内输入邮箱验证码" })
+      setFormError(null)
       startCountdown()
     } catch (error) {
+      const message = getErrorMessage(error, "请稍后重试")
+      setFormError(message)
       toast({
         title: "发送失败",
-        description: getErrorMessage(error, "请稍后重试"),
+        description: message,
         variant: "destructive",
       })
       resetCountdown()
@@ -131,26 +143,27 @@ export function RegisterForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setFormError(null)
 
     if (password.length < 8) {
-      toast({ title: "密码过短", description: "密码长度需大于 8 位", variant: "destructive" })
+      raiseInlineError("密码过短", "密码长度需大于 8 位")
       return
     }
 
     if (password !== confirmPassword) {
-      toast({ title: "密码不一致", description: "请确认两次输入一致", variant: "destructive" })
+      raiseInlineError("密码不一致", "请确认两次输入一致")
       return
     }
 
     if (!validateEmailForWhitelist()) return
 
     if (requiresEmailCode && !emailCode.trim()) {
-      toast({ title: "请输入邮箱验证码", variant: "destructive" })
+      raiseInlineError("请输入邮箱验证码")
       return
     }
 
     if (inviteRequired && !inviteCode.trim()) {
-      toast({ title: "需要邀请码", description: "请填写受邀的邀请码", variant: "destructive" })
+      raiseInlineError("需要邀请码", "请填写受邀的邀请码")
       return
     }
 
@@ -174,9 +187,11 @@ export function RegisterForm() {
       toast({ title: "注册成功", description: "欢迎加入！" })
       router.push("/dashboard")
     } catch (error) {
+      const message = getErrorMessage(error, "请稍后重试")
+      setFormError(message)
       toast({
         title: "注册失败",
-        description: getErrorMessage(error, "请稍后重试"),
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -195,6 +210,11 @@ export function RegisterForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <Alert variant="destructive">
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
+          )}
           {hasWhitelist ? (
             <div className="space-y-2">
               <Label htmlFor="email-local">邮箱</Label>
@@ -289,7 +309,16 @@ export function RegisterForm() {
                   onClick={handleSendCode}
                   disabled={sendingCode || codeCountdown > 0}
                 >
-                  {codeCountdown > 0 ? `${codeCountdown}s` : sendingCode ? "发送中..." : "发送验证码"}
+                  {codeCountdown > 0 ? (
+                    `${codeCountdown}s`
+                  ) : sendingCode ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner />
+                      发送中...
+                    </span>
+                  ) : (
+                    "发送验证码"
+                  )}
                 </Button>
               </div>
             </div>
@@ -311,7 +340,14 @@ export function RegisterForm() {
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "注册中..." : "注册"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner />
+                注册中...
+              </span>
+            ) : (
+              "注册"
+            )}
           </Button>
         </form>
       </CardContent>

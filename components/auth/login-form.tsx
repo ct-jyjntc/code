@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CaptchaWidget } from "@/components/auth/captcha-widget"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
 import { api } from "@/lib/api"
 import { extractAuthToken, setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
@@ -22,6 +24,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
   const [forgetOpen, setForgetOpen] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
@@ -29,6 +32,19 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setFormError(null)
+
+    if (!email.trim() || !password.trim()) {
+      const message = "请输入邮箱和密码"
+      setFormError(message)
+      toast({
+        title: "登录失败",
+        description: message,
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -38,15 +54,18 @@ export function LoginForm() {
         throw new Error("认证信息缺失，请重试")
       }
       setAuthToken(token)
+      setFormError(null)
       toast({
         title: "登录成功",
         description: "欢迎回来！",
       })
       router.replace("/dashboard")
     } catch (error) {
+      const message = getErrorMessage(error, "请检查您的凭据")
+      setFormError(message)
       toast({
         title: "登录失败",
-        description: getErrorMessage(error, "请检查您的凭据"),
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -63,6 +82,11 @@ export function LoginForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {formError && (
+              <Alert variant="destructive">
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">邮箱</Label>
               <Input
@@ -90,7 +114,14 @@ export function LoginForm() {
               </Button>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "登录中..." : "登录"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner />
+                  登录中...
+                </span>
+              ) : (
+                "登录"
+              )}
             </Button>
           </form>
         </CardContent>
@@ -122,6 +153,7 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
   const [emailCode, setEmailCode] = useState("")
   const [sendingCode, setSendingCode] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [dialogError, setDialogError] = useState<string | null>(null)
   const { toast } = useToast()
   const captcha = useCaptcha(config)
   const { remaining: countdown, start: startCountdown, reset: resetCountdown } = useCountdown(60)
@@ -137,6 +169,7 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
       setEmailCode("")
       setSendingCode(false)
       setSubmitting(false)
+      setDialogError(null)
       resetCountdown()
       if (shouldResetCaptcha) {
         resetCaptchaSolution()
@@ -146,17 +179,22 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
 
   const handleSendCode = async () => {
     if (controlsDisabled) {
+      const message = configLoading ? "配置加载中，请稍后再试" : "配置异常，请刷新页面后重试"
+      setDialogError(message)
       toast({
         title: configLoading ? "配置加载中" : "配置异常",
-        description: configLoading ? "请稍后再试" : "请刷新页面后重试",
+        description: message,
         variant: "destructive",
       })
       return
     }
     if (!email) {
-      toast({ title: "请输入邮箱", variant: "destructive" })
+      const message = "请输入邮箱"
+      setDialogError(message)
+      toast({ title: message, variant: "destructive" })
       return
     }
+    setDialogError(null)
     setSendingCode(true)
     try {
       const captchaPayload = await captcha.requestPayload("forget_send_code")
@@ -164,9 +202,11 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
       toast({ title: "验证码已发送", description: "请前往邮箱获取验证码" })
       startCountdown()
     } catch (error) {
+      const message = getErrorMessage(error, "请稍后再试")
+      setDialogError(message)
       toast({
         title: "发送失败",
-        description: getErrorMessage(error, "请稍后再试"),
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -179,26 +219,35 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
 
   const handleResetPassword = async () => {
     if (controlsDisabled) {
+      const message = configLoading ? "配置加载中，请稍后再试" : "配置异常，请刷新页面后重试"
+      setDialogError(message)
       toast({
         title: configLoading ? "配置加载中" : "配置异常",
-        description: configLoading ? "请稍后再试" : "请刷新页面后重试",
+        description: message,
         variant: "destructive",
       })
       return
     }
     if (!email || !emailCode) {
-      toast({ title: "请填写完整信息", variant: "destructive" })
+      const message = "请填写完整信息"
+      setDialogError(message)
+      toast({ title: message, variant: "destructive" })
       return
     }
     if (password.length < 8) {
-      toast({ title: "新密码过短", description: "密码长度需大于 8 位", variant: "destructive" })
+      const message = "密码长度需大于 8 位"
+      setDialogError(message)
+      toast({ title: "新密码过短", description: message, variant: "destructive" })
       return
     }
     if (password !== confirmPassword) {
-      toast({ title: "密码不一致", description: "请确认两次输入一致", variant: "destructive" })
+      const message = "请确认两次输入一致"
+      setDialogError(message)
+      toast({ title: "密码不一致", description: message, variant: "destructive" })
       return
     }
 
+    setDialogError(null)
     setSubmitting(true)
     try {
       await api.forgetPassword({
@@ -207,11 +256,14 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
         email_code: emailCode.trim(),
       })
       toast({ title: "重置成功", description: "请使用新密码重新登录" })
+      setDialogError(null)
       onOpenChange(false)
     } catch (error) {
+      const message = getErrorMessage(error, "请稍后再试")
+      setDialogError(message)
       toast({
         title: "重置失败",
-        description: getErrorMessage(error, "请稍后再试"),
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -226,6 +278,11 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
           <DialogTitle>重置密码</DialogTitle>
           <DialogDescription>输入注册邮箱并完成验证即可重置密码</DialogDescription>
         </DialogHeader>
+        {dialogError && !configLoading && !configError && (
+          <Alert variant="destructive">
+            <AlertDescription>{dialogError}</AlertDescription>
+          </Alert>
+        )}
         {configLoading ? (
           <div className="py-6 text-center text-sm text-muted-foreground">正在加载安全配置…</div>
         ) : configError ? (
@@ -265,7 +322,16 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
                   onClick={handleSendCode}
                   disabled={sendingCode || countdown > 0 || controlsDisabled}
                 >
-                  {countdown > 0 ? `${countdown}s` : sendingCode ? "发送中..." : "发送验证码"}
+                  {countdown > 0 ? (
+                    `${countdown}s`
+                  ) : sendingCode ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner />
+                      发送中...
+                    </span>
+                  ) : (
+                    "发送验证码"
+                  )}
                 </Button>
               </div>
             </div>
@@ -304,7 +370,14 @@ function ForgotPasswordDialog({ open, onOpenChange, config, configLoading, confi
             取消
           </Button>
           <Button onClick={handleResetPassword} disabled={submitting || controlsDisabled}>
-            {submitting ? "提交中..." : "重置密码"}
+            {submitting ? (
+              <span className="flex items-center gap-2">
+                <Spinner />
+                提交中...
+              </span>
+            ) : (
+              "重置密码"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

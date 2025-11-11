@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
 import { Users, Copy, Plus, Gift, TrendingUp, ArrowRightLeft, Wallet } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -321,7 +322,14 @@ export default function InvitePage() {
               />
             </div>
             <Button className="w-full sm:w-auto" onClick={handleTransfer} disabled={transferring}>
-              {transferring ? "划转中..." : "确认划转"}
+              {transferring ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner />
+                  划转中...
+                </span>
+              ) : (
+                "确认划转"
+              )}
             </Button>
           </CardContent>
         </Card>
@@ -368,7 +376,14 @@ export default function InvitePage() {
               onClick={handleWithdraw}
               disabled={withdrawing || withdrawMethods.length === 0}
             >
-              {withdrawing ? "提交中..." : "提交提现申请"}
+              {withdrawing ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner />
+                  提交中...
+                </span>
+              ) : (
+                "提交提现申请"
+              )}
             </Button>
             <p className="text-xs text-muted-foreground">
               提交后系统会创建工单，请等待客服审核处理。
@@ -387,8 +402,17 @@ export default function InvitePage() {
         </CardHeader>
         <CardContent>
           <Button onClick={handleGenerateCode} disabled={generating}>
-            <Plus className="mr-2 h-4 w-4" />
-            {generating ? "生成中..." : "生成新邀请码"}
+            {generating ? (
+              <span className="flex items-center gap-2">
+                <Spinner />
+                生成中...
+              </span>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                生成新邀请码
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
