@@ -39,6 +39,8 @@ interface Plan {
   popular?: boolean
   purchase_period?: string
   available_periods?: PlanPeriod[]
+  speed_limit?: number | null
+  device_limit?: number | null
 }
 
 interface OrderInfo {
@@ -121,10 +123,13 @@ export default function SubscribePage() {
     }
   }
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return "0 GB"
-    const gb = bytes / (1024 * 1024 * 1024)
-    return `${gb.toFixed(0)} GB`
+  const formatDataVolume = (bytes: number) => {
+    if (!bytes || bytes <= 0) return "不限"
+    const units = ["B", "KB", "MB", "GB", "TB", "PB"]
+    const index = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)))
+    const value = bytes / Math.pow(1024, index)
+    const displayValue = value % 1 === 0 ? value.toFixed(0) : value >= 10 ? value.toFixed(1) : value.toFixed(2)
+    return `${displayValue.replace(/\.0+$/, "")} ${units[index]}`
   }
 
   const getPlanIcon = (index: number) => {
@@ -180,29 +185,29 @@ export default function SubscribePage() {
             const periodPrice = selectedPeriod?.price ?? plan.price
 
             return (
-              <Card key={plan.id} className={plan.popular ? "border-primary shadow-lg shadow-primary/20" : ""}>
+              <Card key={plan.id} className={`flex flex-col ${plan.popular ? "border-primary shadow-lg shadow-primary/20" : ""}`}>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center bg-primary/10">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
                         <Icon className="h-4 w-4 text-primary" />
                       </div>
-                      <CardTitle>{plan.name}</CardTitle>
+                      <div>
+                        <CardTitle className="text-xl">{plan.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{periodLabel}</p>
+                      </div>
                     </div>
                     {plan.popular && <Badge variant="default">热门</Badge>}
                   </div>
-                  <CardDescription>
-                    {periodLabel} · {formatBytes(plan.bandwidth)}
-                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold">¥{periodPrice.toFixed(2)}</span>
-                    <span className="text-muted-foreground">/{periodDays > 0 ? `${periodDays}天` : "一次性"}</span>
+                <CardContent className="flex flex-1 flex-col gap-5">
+                  <div>
+                    <div className="text-4xl font-bold text-foreground">¥{periodPrice.toFixed(2)}</div>
+                    <p className="text-sm text-muted-foreground">{periodDays > 0 ? `${periodDays} 天` : "一次性套餐"}</p>
                   </div>
 
                   {plan.available_periods && plan.available_periods.length > 0 && (
-                    <div className="mb-4 space-y-1">
+                    <div className="space-y-2 rounded-lg border border-dashed px-3 py-3">
                       <Label className="text-xs text-muted-foreground">选择计费周期</Label>
                       <Select
                         value={selectedKey}
@@ -213,10 +218,10 @@ export default function SubscribePage() {
                           }))
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="选择计费周期" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent align="start">
                           {plan.available_periods.map((period) => (
                             <SelectItem key={period.legacyKey} value={period.legacyKey}>
                               {period.label} · ¥{period.price.toFixed(2)}
@@ -227,29 +232,35 @@ export default function SubscribePage() {
                     </div>
                   )}
 
-                  <ul className="space-y-2">
-                    {plan.features?.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    )) || (
-                      <>
-                        <li className="flex items-start gap-2 text-sm">
+                  <div className="grid gap-3 rounded-lg bg-muted/30 p-3 text-sm">
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>流量额度</span>
+                      <span className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>速率限制</span>
+                      <span className="font-semibold text-foreground">
+                        {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>设备数量</span>
+                      <span className="font-semibold text-foreground">
+                        {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {plan.features && plan.features.length > 0 && (
+                    <ul className="space-y-2 text-sm">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-muted-foreground">
                           <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                          <span className="text-muted-foreground">高速节点访问</span>
+                          <span>{feature}</span>
                         </li>
-                        <li className="flex items-start gap-2 text-sm">
-                          <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                          <span className="text-muted-foreground">{formatBytes(plan.bandwidth)} 流量</span>
-                        </li>
-                        <li className="flex items-start gap-2 text-sm">
-                          <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                          <span className="text-muted-foreground">{periodLabel}</span>
-                        </li>
-                      </>
-                    )}
-                  </ul>
+                      ))}
+                    </ul>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button

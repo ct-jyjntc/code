@@ -200,14 +200,14 @@ const normalizePlan = (plan: any) => {
     price: 0,
   }
   const transferBytes = gbToBytes(plan?.transfer_enable ?? 0)
-  const features =
-    Array.isArray(plan?.tags) && plan.tags.length > 0
-      ? plan.tags
-      : [
-          `流量：${transferBytes > 0 ? formatBytes(transferBytes) : "不限"}`,
-          plan?.speed_limit ? `限速 ${plan.speed_limit} Mbps` : "不限速",
-          plan?.device_limit ? `设备数 ${plan.device_limit} 台` : "设备不限",
-        ]
+  const features = Array.isArray(plan?.tags) ? plan.tags.filter(Boolean) : []
+  const toNumber = (value: any) => {
+    if (value === null || value === undefined || value === "") return null
+    const num = Number(value)
+    return Number.isFinite(num) ? num : null
+  }
+  const speedLimit = toNumber(plan?.speed_limit)
+  const deviceLimit = toNumber(plan?.device_limit)
 
   return {
     id: String(plan?.id ?? ""),
@@ -217,6 +217,8 @@ const normalizePlan = (plan: any) => {
     duration_label: primaryPeriod.label,
     bandwidth: transferBytes,
     features,
+    speed_limit: speedLimit,
+    device_limit: deviceLimit,
     popular: Boolean(plan?.tags?.includes("popular")),
     purchase_period: primaryPeriod.legacyKey,
     available_periods: periods,
