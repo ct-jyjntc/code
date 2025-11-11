@@ -1,19 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { MessageSquare, Send, ArrowLeft, User } from "lucide-react"
+import { MessageSquare, Send, ArrowLeft, User, ImagePlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getErrorMessage } from "@/lib/errors"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 interface Message {
   id: string
@@ -39,8 +41,11 @@ export default function TicketDetailPage() {
   const [reply, setReply] = useState("")
   const [sending, setSending] = useState(false)
   const [closing, setClosing] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const picgoApiKey = "chv_SPkDM_c248014d65780b4af1faedba654c0df56d978b516d50258aba77a9d1f9101a9d46c8238b550df61dafbd8a60665e3604b14a443f4bb4d39f9851cc57aab79fd9"
 
   useEffect(() => {
     fetchTicketDetail()
@@ -64,6 +69,60 @@ export default function TicketDetailPage() {
 
   const lastMessage = ticket?.messages?.[ticket.messages.length - 1]
   const awaitingSupportReply = Boolean(ticket && ticket.messages.length > 0 && lastMessage && !lastMessage.is_admin)
+
+  const handleUploadImage = async (file: File) => {
+    if (!picgoApiKey) {
+      toast({
+        title: "缺少图床配置",
+        description: "尚未设置 PicGo API Key，无法上传图片",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append("source", file)
+
+      const response = await fetch("/api/picgo", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error(`上传失败（${response.status}）`)
+      }
+
+      const data = await response.json()
+      const imageUrl =
+        data?.image?.url ||
+        data?.image?.image?.url ||
+        data?.image?.display_url ||
+        data?.image?.thumb?.url ||
+        data?.image?.url_viewer
+
+      if (!imageUrl) {
+        throw new Error("图床未返回图片地址")
+      }
+
+      setReply((prev) => {
+        const addition = `![图片](${imageUrl})`
+        return prev.trim().length > 0 ? `${prev.trimEnd()}\n\n${addition}\n` : `${addition}\n`
+      })
+
+      toast({ title: "图片已上传", description: "已插入 Markdown，可直接发送" })
+    } catch (error) {
+      console.error("Failed to upload image:", error)
+      toast({
+        title: "上传失败",
+        description: getErrorMessage(error, "无法上传图片，请稍后重试"),
+        variant: "destructive",
+      })
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   const handleReply = async () => {
     if (awaitingSupportReply) {
@@ -207,7 +266,24 @@ export default function TicketDetailPage() {
                   className={`p-3 ${message.is_admin ? "bg-muted" : "bg-primary text-primary-foreground"}`}
                   style={{ maxWidth: "80%" }}
                 >
-                  <p className="whitespace-pre-wrap text-sm">{message.message}</p>
+                  <div className="prose prose-sm break-words dark:prose-invert">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ node, ...props }) => (
+                          <a
+                            {...props}
+                            className="underline decoration-dashed hover:decoration-solid"
+                            target="_blank"
+                            rel="noreferrer"
+                          />
+                        ),
+                        img: ({ node, ...props }) => <img {...props} className="my-2 max-h-64 w-auto rounded border" loading="lazy" />,
+                      }}
+                    >
+                      {message.message || ""}
+                    </ReactMarkdown>
+                  </div>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {new Date(message.created_at).toLocaleString("zh-CN")}
@@ -240,7 +316,40 @@ export default function TicketDetailPage() {
               onChange={(e) => setReply(e.target.value)}
               disabled={awaitingSupportReply || sending}
             />
-            <div className="flex justify-end">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage || awaitingSupportReply || sending}
+                >
+                  {uploadingImage ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner className="size-4" />
+                      上传中...
+                    </span>
+                  ) : (
+                    <>
+                      <ImagePlus className="mr-2 h-4 w-4" />
+                      上传图片
+                    </>
+                  )}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    if (file) {
+                      handleUploadImage(file)
+                      event.target.value = ""
+                    }
+                  }}
+                />
+              </div>
               <Button onClick={handleReply} disabled={sending || awaitingSupportReply}>
                 {sending ? (
                   <span className="flex items-center gap-2">
