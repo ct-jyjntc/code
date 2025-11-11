@@ -400,43 +400,14 @@ export default function InvitePage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>邀请码</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>使用者</TableHead>
                     <TableHead>创建时间</TableHead>
-                    <TableHead className="text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {invites.map((invite) => (
                     <TableRow key={invite.id}>
                       <TableCell className="font-mono font-medium">{invite.code}</TableCell>
-                      <TableCell>
-                        {invite.status === "active" && (
-                          <span className="inline-flex items-center bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                            可用
-                          </span>
-                        )}
-                        {invite.status === "used" && (
-                          <span className="inline-flex items-center bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-                            已使用
-                          </span>
-                        )}
-                        {invite.status === "expired" && (
-                          <span className="inline-flex items-center bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
-                            已过期
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{invite.used_by || <span className="text-muted-foreground">-</span>}</TableCell>
                       <TableCell>{new Date(invite.created_at).toLocaleDateString("zh-CN")}</TableCell>
-                      <TableCell className="text-right">
-                        {invite.status === "active" && (
-                          <Button variant="ghost" size="sm" onClick={() => handleCopyCode(invite.code)}>
-                            <Copy className="mr-2 h-4 w-4" />
-                            复制链接
-                          </Button>
-                        )}
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

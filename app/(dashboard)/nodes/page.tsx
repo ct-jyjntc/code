@@ -189,15 +189,6 @@ export default function NodesPage() {
           ))}
         </div>
       )}
-
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Activity className="h-4 w-4" />
-            <span>节点状态每 30 秒自动刷新</span>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
