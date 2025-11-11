@@ -5,7 +5,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
-  FileText,
   ShoppingCart,
   Users,
   CreditCard,
@@ -15,24 +14,27 @@ import {
   Activity,
   LogOut,
   Menu,
+  ShieldCheck,
+  BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { removeAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
 const navItems = [
   { href: "/dashboard", label: "仪表盘", icon: LayoutDashboard },
-  { href: "/docs", label: "使用文档", icon: FileText },
+  { href: "/subscription", label: "我的订阅", icon: ShieldCheck },
+  { href: "/subscribe", label: "订阅商店", icon: CreditCard },
   { href: "/orders", label: "我的订单", icon: ShoppingCart },
-  { href: "/invite", label: "我的邀请", icon: Users },
-  { href: "/subscribe", label: "购买订阅", icon: CreditCard },
   { href: "/nodes", label: "节点状态", icon: Server },
-  { href: "/profile", label: "个人中心", icon: User },
+  { href: "/knowledge", label: "使用文档", icon: BookOpen },
+  { href: "/invite", label: "我的邀请", icon: Users },
   { href: "/tickets", label: "我的工单", icon: MessageSquare },
   { href: "/traffic", label: "流量明细", icon: Activity },
+  { href: "/profile", label: "个人中心", icon: User },
 ]
 
 export function MobileNav() {
@@ -62,6 +64,9 @@ export function MobileNav() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0 bg-white/95 dark:bg-black/90">
+            <SheetHeader className="sr-only">
+              <SheetTitle>移动端导航菜单</SheetTitle>
+            </SheetHeader>
             <div className="flex h-full flex-col">
               <div className="flex h-16 items-center justify-between border-b border-border px-6">
                 <div className="flex flex-col leading-tight">
