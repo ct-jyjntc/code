@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Server, Activity, Globe, Signal } from "lucide-react"
+import { Server, Globe } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface Node {
@@ -13,8 +13,6 @@ interface Node {
   name: string
   location: string
   status: "online" | "offline" | "maintenance"
-  load: number
-  latency: number
 }
 
 export default function NodesPage() {
@@ -54,18 +52,6 @@ export default function NodesPage() {
 
     const statusInfo = statusMap[status] || { variant: "outline", label: "未知" }
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-  }
-
-  const getLoadColor = (load: number) => {
-    if (load < 50) return "text-green-500"
-    if (load < 80) return "text-yellow-500"
-    return "text-red-500"
-  }
-
-  const getLatencyColor = (latency: number) => {
-    if (latency < 100) return "text-green-500"
-    if (latency < 300) return "text-yellow-500"
-    return "text-red-500"
   }
 
   if (loading) {
@@ -125,66 +111,31 @@ export default function NodesPage() {
                     : ""
               }
             >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center ${
+              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center ${
+                      node.status === "online"
+                        ? "bg-primary/10"
+                        : node.status === "offline"
+                          ? "bg-destructive/10"
+                          : "bg-secondary"
+                    }`}
+                  >
+                    <Server
+                      className={`h-4 w-4 ${
                         node.status === "online"
-                          ? "bg-primary/10"
+                          ? "text-primary"
                           : node.status === "offline"
-                            ? "bg-destructive/10"
-                            : "bg-secondary"
+                            ? "text-destructive"
+                            : "text-secondary-foreground"
                       }`}
-                    >
-                      <Server
-                        className={`h-4 w-4 ${
-                          node.status === "online"
-                            ? "text-primary"
-                            : node.status === "offline"
-                              ? "text-destructive"
-                              : "text-secondary-foreground"
-                        }`}
-                      />
-                    </div>
-                    <CardTitle className="text-base">{node.name}</CardTitle>
-                  </div>
-                  {getStatusBadge(node.status)}
-                </div>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Globe className="h-4 w-4" />
-                  {node.location}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Activity className="h-4 w-4" />
-                      负载
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-semibold ${getLoadColor(node.load)}`}>{node.load}%</span>
-                    </div>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden bg-secondary">
-                    <div
-                      className={`h-full transition-all ${
-                        node.load < 50 ? "bg-green-500" : node.load < 80 ? "bg-yellow-500" : "bg-red-500"
-                      }`}
-                      style={{ width: `${node.load}%` }}
                     />
                   </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Signal className="h-4 w-4" />
-                      延迟
-                    </div>
-                    <span className={`text-sm font-semibold ${getLatencyColor(node.latency)}`}>{node.latency} ms</span>
-                  </div>
+                  <div className="text-sm font-medium text-foreground">{node.name}</div>
                 </div>
-              </CardContent>
+                {getStatusBadge(node.status)}
+              </div>
             </Card>
           ))}
         </div>
