@@ -13,11 +13,15 @@ import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
 import { BookOpen, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import ReactMarkdown from "react-markdown"
+import rehypeRaw from "rehype-raw"
+import remarkGfm from "remark-gfm"
 
 interface KnowledgeArticle {
   id: string
   title: string
-  summary: string
+  summary?: string
+  body?: string
   updated_at: string
 }
 
@@ -65,11 +69,12 @@ export default function KnowledgePage() {
       groups
         .map((group) => ({
           ...group,
-          articles: group.articles.filter(
-            (article) =>
-              article.title.toLowerCase().includes(lowerKeyword) ||
-              article.summary.toLowerCase().includes(lowerKeyword),
-          ),
+          articles: group.articles.filter((article) => {
+            const titleMatch = article.title.toLowerCase().includes(lowerKeyword)
+            const summaryMatch = article.summary?.toLowerCase().includes(lowerKeyword) ?? false
+            const bodyMatch = article.body?.toLowerCase().includes(lowerKeyword) ?? false
+            return titleMatch || summaryMatch || bodyMatch
+          }),
         }))
         .filter((group) => group.articles.length > 0),
     )
@@ -128,7 +133,70 @@ export default function KnowledgePage() {
                     <AccordionItem value={article.id} key={article.id}>
                       <AccordionTrigger className="text-left">{article.title}</AccordionTrigger>
                       <AccordionContent>
-                        <p className="text-sm leading-6 text-muted-foreground">{article.summary}</p>
+                        {article.summary && (
+                          <p className="text-sm leading-6 text-muted-foreground">{article.summary}</p>
+                        )}
+                        {article.body && (
+                          <div className="prose prose-sm mt-3 max-w-none text-muted-foreground dark:prose-invert">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              rehypePlugins={[rehypeRaw]}
+                              components={{
+                                a: ({ node, ...props }) => (
+                                  <a
+                                    {...props}
+                                    className="text-primary underline decoration-dashed hover:decoration-solid"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  />
+                                ),
+                                table: ({ node, ...props }) => (
+                                  <div className="my-4 overflow-x-auto rounded-lg border">
+                                    <table {...props} className="w-full text-sm" />
+                                  </div>
+                                ),
+                                code: ({ node, inline, className, children, ...props }) =>
+                                  inline ? (
+                                    <code
+                                      {...props}
+                                      className={`rounded bg-muted px-1.5 py-0.5 text-xs font-semibold text-foreground ${className ?? ""}`}
+                                    >
+                                      {children}
+                                    </code>
+                                  ) : (
+                                    <pre className="my-3 overflow-x-auto rounded-lg bg-muted p-4 text-xs">
+                                      <code {...props} className={className}>
+                                        {children}
+                                      </code>
+                                    </pre>
+                                  ),
+                                pre: ({ node, children, ...props }) => (
+                                  <pre className="my-3 overflow-x-auto rounded-lg bg-muted p-4 text-xs" {...props}>
+                                    {children}
+                                  </pre>
+                                ),
+                                ul: ({ node, ...props }) => <ul {...props} className="my-2 list-disc pl-6" />,
+                                ol: ({ node, ...props }) => <ol {...props} className="my-2 list-decimal pl-6" />,
+                                li: ({ node, ...props }) => <li {...props} className="leading-6" />,
+                                blockquote: ({ node, ...props }) => (
+                                  <blockquote {...props} className="border-l-4 border-primary/50 bg-muted/40 p-3 text-sm italic" />
+                                ),
+                                img: ({ node, ...props }) => (
+                                  <img {...props} className="my-4 max-w-full rounded-lg border" loading="lazy" />
+                                ),
+                                details: ({ node, ...props }) => (
+                                  <details {...props} className="rounded-lg border border-dashed bg-muted/40 px-4 py-2 text-sm" />
+                                ),
+                                summary: ({ node, ...props }) => (
+                                  <summary {...props} className="cursor-pointer text-sm font-semibold text-foreground" />
+                                ),
+                                hr: () => <hr className="my-6 border-dashed border-primary/30" />,
+                              }}
+                            >
+                              {article.body}
+                            </ReactMarkdown>
+                          </div>
+                        )}
                         <p className="mt-3 text-xs text-muted-foreground">
                           最近更新：{new Date(article.updated_at).toLocaleString("zh-CN")}
                         </p>
