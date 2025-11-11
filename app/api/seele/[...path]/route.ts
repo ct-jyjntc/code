@@ -46,25 +46,37 @@ const proxyRequest = async (request: Request, context: RouteContext) => {
   const headers = new Headers(request.headers)
   sanitizeHeaders(headers)
 
-  const body =
-    request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer()
+  try {
+    const body =
+      request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer()
 
-  const fetchResponse = await fetch(targetUrl, {
-    method: request.method,
-    headers,
-    body,
-    redirect: "manual",
-    cache: "no-store",
-  })
+    const fetchResponse = await fetch(targetUrl, {
+      method: request.method,
+      headers,
+      body,
+      redirect: "manual",
+      cache: "no-store",
+    })
 
-  const responseHeaders = new Headers(fetchResponse.headers)
-  sanitizeHeaders(responseHeaders)
+    const responseHeaders = new Headers(fetchResponse.headers)
+    sanitizeHeaders(responseHeaders)
 
-  return new Response(fetchResponse.body, {
-    status: fetchResponse.status,
-    statusText: fetchResponse.statusText,
-    headers: responseHeaders,
-  })
+    return new Response(fetchResponse.body, {
+      status: fetchResponse.status,
+      statusText: fetchResponse.statusText,
+      headers: responseHeaders,
+    })
+  } catch (error) {
+    console.error("[proxy] 请求失败", targetUrl, error)
+    const message = error instanceof Error ? error.message : "Unknown proxy error"
+    return new Response(JSON.stringify({ error: "Proxy request failed", detail: message }), {
+      status: 502,
+      headers: {
+        "content-type": "application/json",
+        "cache-control": "no-store",
+      },
+    })
+  }
 }
 
 export const dynamic = "force-dynamic"
