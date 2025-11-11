@@ -91,9 +91,15 @@ const ensureArray = <T>(value: unknown): T[] => {
 const normalizeTimestamp = (value?: string | number | null) => {
   if (value === null || value === undefined) return undefined
   const numeric = Number(value)
-  if (Number.isNaN(numeric)) return undefined
-  const ms = numeric > 1e12 ? numeric : numeric * 1000
-  return new Date(ms).toISOString()
+  if (!Number.isNaN(numeric)) {
+    const ms = numeric > 1e12 ? numeric : numeric * 1000
+    return new Date(ms).toISOString()
+  }
+  const parsed = Date.parse(String(value))
+  if (!Number.isNaN(parsed)) {
+    return new Date(parsed).toISOString()
+  }
+  return undefined
 }
 
 const bytesFromValue = (value?: number | null) => {

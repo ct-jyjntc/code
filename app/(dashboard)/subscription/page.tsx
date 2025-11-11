@@ -282,12 +282,6 @@ export default function SubscriptionPage() {
             </p>
           </div>
           <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">上次重置</p>
-            <p className="text-lg font-semibold">
-              {subscription.last_reset_at ? new Date(subscription.last_reset_at).toLocaleDateString("zh-CN") : "--"}
-            </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
             <p className="text-sm text-muted-foreground">订阅 Token</p>
             <div className="break-all rounded-md border border-dashed bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
               {subscription.token}
