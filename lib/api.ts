@@ -544,6 +544,17 @@ export const api = {
     return normalizeUserInfo(data)
   },
 
+  changePassword: async (oldPassword: string, newPassword: string) => {
+    if (USE_MOCK_DATA) return { success: true }
+    return fetchWithAuth("/user/changePassword", {
+      method: "POST",
+      body: {
+        old_password: oldPassword,
+        new_password: newPassword,
+      },
+    })
+  },
+
   // Dashboard
   getDashboardStats: async () => {
     if (USE_MOCK_DATA) return mockDashboardStats

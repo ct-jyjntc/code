@@ -23,6 +23,10 @@ interface UserInfo {
 export default function ProfilePage() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [loading, setLoading] = useState(true)
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [updatingPassword, setUpdatingPassword] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -83,6 +87,42 @@ export default function ProfilePage() {
       .join("")
       .toUpperCase()
       .slice(0, 2)
+  }
+
+  const handlePasswordUpdate = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({ title: "请填写完整", description: "所有密码字段均为必填", variant: "destructive" })
+      return
+    }
+    if (newPassword.length < 8) {
+      toast({ title: "新密码过短", description: "密码长度需至少 8 位", variant: "destructive" })
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "密码不一致", description: "请确认两次输入一致", variant: "destructive" })
+      return
+    }
+    if (newPassword === currentPassword) {
+      toast({ title: "无效的新密码", description: "新密码不能与当前密码相同", variant: "destructive" })
+      return
+    }
+
+    setUpdatingPassword(true)
+    try {
+      await api.changePassword(currentPassword, newPassword)
+      toast({ title: "修改成功", description: "密码已更新，请使用新密码重新登录" })
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+    } catch (error) {
+      toast({
+        title: "修改失败",
+        description: getErrorMessage(error, "无法更新密码，请稍后重试"),
+        variant: "destructive",
+      })
+    } finally {
+      setUpdatingPassword(false)
+    }
   }
 
   return (
@@ -165,17 +205,37 @@ export default function ProfilePage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="current-password">当前密码</Label>
-                <Input id="current-password" type="password" />
+                <Input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-password">新密码</Label>
-                <Input id="new-password" type="password" />
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">确认新密码</Label>
-                <Input id="confirm-password" type="password" />
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
               </div>
-              <Button className="w-full sm:w-auto">更新密码</Button>
+              <Button className="w-full sm:w-auto" onClick={handlePasswordUpdate} disabled={updatingPassword}>
+                {updatingPassword ? "更新中..." : "更新密码"}
+              </Button>
             </CardContent>
           </Card>
         </div>
