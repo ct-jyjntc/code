@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface Ticket {
   id: string
@@ -38,6 +39,8 @@ export default function TicketsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
+  const [priority, setPriority] = useState("0")
+  const [statusFilter, setStatusFilter] = useState("all")
   const { toast } = useToast()
   const router = useRouter()
 
@@ -73,7 +76,7 @@ export default function TicketsPage() {
 
     setCreating(true)
     try {
-      await api.createTicket(subject, message)
+      await api.createTicket(subject, message, Number(priority))
       toast({
         title: "创建成功",
         description: "工单已创建，客服将尽快回复",
@@ -93,6 +96,27 @@ export default function TicketsPage() {
       setCreating(false)
     }
   }
+
+  const handleCloseTicket = async (ticketId: string) => {
+    try {
+      await api.closeTicket(ticketId)
+      toast({
+        title: "工单已关闭",
+        description: "该工单已成功关闭",
+      })
+      await fetchTickets()
+    } catch (error) {
+      console.error("[v0] Failed to close ticket:", error)
+      toast({
+        title: "关闭失败",
+        description: "无法关闭该工单，请稍后重试",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const filteredTickets =
+    statusFilter === "all" ? tickets : tickets.filter((ticket) => ticket.status === statusFilter)
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -139,53 +163,79 @@ export default function TicketsPage() {
           <h1 className="text-3xl font-bold text-balance text-foreground">我的工单</h1>
           <p className="text-muted-foreground">查看和管理您的支持工单</p>
         </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="筛选状态" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部状态</SelectItem>
+              <SelectItem value="open">进行中</SelectItem>
+              <SelectItem value="replied">已回复</SelectItem>
+              <SelectItem value="closed">已关闭</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              创建工单
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
-            <DialogHeader>
-              <DialogTitle>创建新工单</DialogTitle>
-              <DialogDescription>描述您遇到的问题，我们的客服团队将尽快回复</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="subject">标题</Label>
-                <Input
-                  id="subject"
-                  placeholder="简要描述您的问题"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">问题详情</Label>
-                <Textarea
-                  id="message"
-                  placeholder="请详细描述您遇到的问题..."
-                  rows={6}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={creating}>
-                取消
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                创建工单
               </Button>
-              <Button onClick={handleCreateTicket} disabled={creating}>
-                {creating ? "创建中..." : "提交工单"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[525px]">
+              <DialogHeader>
+                <DialogTitle>创建新工单</DialogTitle>
+                <DialogDescription>描述您遇到的问题，我们的客服团队将尽快回复</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subject">标题</Label>
+                  <Input
+                    id="subject"
+                    placeholder="简要描述您的问题"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">问题详情</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="请详细描述您遇到的问题..."
+                    rows={6}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="priority">优先级</Label>
+                  <Select value={priority} onValueChange={setPriority}>
+                    <SelectTrigger id="priority">
+                      <SelectValue placeholder="请选择优先级" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">普通</SelectItem>
+                      <SelectItem value="1">急需</SelectItem>
+                      <SelectItem value="2">紧急</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={creating}>
+                  取消
+                </Button>
+                <Button onClick={handleCreateTicket} disabled={creating}>
+                  {creating ? "创建中..." : "提交工单"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      {tickets.length === 0 ? (
+      {filteredTickets.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center bg-muted">
@@ -203,7 +253,7 @@ export default function TicketsPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {tickets.map((ticket) => (
+          {filteredTickets.map((ticket) => (
             <Card
               key={ticket.id}
               className="cursor-pointer transition-colors hover:bg-accent"
@@ -234,6 +284,30 @@ export default function TicketsPage() {
                 {ticket.updated_at && (
                   <div className="mt-1 text-sm text-muted-foreground">
                     最后更新: {new Date(ticket.updated_at).toLocaleString("zh-CN")}
+                  </div>
+                )}
+                {ticket.status !== "closed" && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        router.push(`/tickets/${ticket.id}`)
+                      }}
+                    >
+                      查看详情
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleCloseTicket(ticket.id)
+                      }}
+                    >
+                      关闭工单
+                    </Button>
                   </div>
                 )}
               </CardContent>

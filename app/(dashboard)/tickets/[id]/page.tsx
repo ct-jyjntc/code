@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { MessageSquare, Send, ArrowLeft, User } from "lucide-react"
+import { MessageSquare, Send, ArrowLeft, User, XCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useParams } from "next/navigation"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -35,6 +35,7 @@ export default function TicketDetailPage() {
   const [loading, setLoading] = useState(true)
   const [reply, setReply] = useState("")
   const [sending, setSending] = useState(false)
+  const [closing, setClosing] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -69,7 +70,7 @@ export default function TicketDetailPage() {
 
     setSending(true)
     try {
-      await api.replyToTicket(ticketId, reply)
+      await api.replyTicket(ticketId, reply)
       toast({
         title: "回复成功",
         description: "您的回复已发送",
@@ -85,6 +86,27 @@ export default function TicketDetailPage() {
       })
     } finally {
       setSending(false)
+    }
+  }
+
+  const handleClose = async () => {
+    setClosing(true)
+    try {
+      await api.closeTicket(ticketId)
+      toast({
+        title: "工单已关闭",
+        description: "该工单已成功关闭",
+      })
+      await fetchTicketDetail()
+    } catch (error) {
+      console.error("[v0] Failed to close ticket:", error)
+      toast({
+        title: "关闭失败",
+        description: "无法关闭该工单，请稍后重试",
+        variant: "destructive",
+      })
+    } finally {
+      setClosing(false)
     }
   }
 
@@ -129,6 +151,12 @@ export default function TicketDetailPage() {
             返回工单列表
           </Button>
         </div>
+        {ticket.status !== "closed" && (
+          <Button variant="ghost" size="sm" onClick={handleClose} disabled={closing}>
+            <XCircle className="mr-2 h-4 w-4" />
+            {closing ? "关闭中..." : "关闭工单"}
+          </Button>
+        )}
       </div>
     )
   }

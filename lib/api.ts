@@ -344,12 +344,17 @@ const normalizeTicket = (ticket: any) => ({
 })
 
 const normalizeTicketDetail = (ticket: any) => {
-  const messages = ensureArray<any>(ticket?.message ?? ticket?.messages).map((message) => ({
-    id: String(message?.id ?? ""),
-    content: message?.message ?? "",
-    sender: message?.is_me ? "user" : "admin",
-    created_at: normalizeTimestamp(message?.created_at) ?? new Date().toISOString(),
-  }))
+  const messages = ensureArray<any>(ticket?.message ?? ticket?.messages).map((message) => {
+    const isUser = Boolean(message?.is_me)
+    return {
+      id: String(message?.id ?? ""),
+      message: message?.message ?? "",
+      is_admin: !isUser,
+      is_me: isUser,
+      sender_name: message?.sender_name,
+      created_at: normalizeTimestamp(message?.created_at) ?? new Date().toISOString(),
+    }
+  })
 
   return {
     id: String(ticket?.id ?? ""),
@@ -643,14 +648,14 @@ export const api = {
     return unwrapCollection(response).map(normalizeTicket)
   },
 
-  createTicket: async (subject: string, content: string) => {
+  createTicket: async (subject: string, content: string, level = 0) => {
     if (USE_MOCK_DATA) return { id: `ticket_${Date.now()}`, status: "open" }
     return fetchWithAuth("/user/ticket/save", {
       method: "POST",
       body: {
         subject,
         message: content,
-        level: 0,
+        level,
       },
     })
   },
@@ -669,6 +674,14 @@ export const api = {
         id: ticketId,
         message: content,
       },
+    })
+  },
+
+  closeTicket: async (ticketId: string) => {
+    if (USE_MOCK_DATA) return { success: true }
+    return fetchWithAuth("/user/ticket/close", {
+      method: "POST",
+      body: { id: ticketId },
     })
   },
 
