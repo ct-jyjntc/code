@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Server, Activity, CreditCard, Sparkles } from "lucide-react"
+import { Server, Activity, CreditCard, Sparkles, BookOpen } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
@@ -99,12 +99,12 @@ export default function DashboardPage() {
       href: "/subscribe",
     },
     {
-      label: "节点状态",
-      description: "查看可用节点列表",
-      icon: Server,
+      label: "使用文档",
+      description: "查看配置指南与常见问题",
+      icon: BookOpen,
       iconBg: "bg-accent/50",
       iconColor: "text-accent-foreground",
-      href: "/nodes",
+      href: "/knowledge",
     },
     {
       label: "创建工单",
