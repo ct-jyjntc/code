@@ -14,6 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Server, Activity, CreditCard, Sparkles } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import rehypeRaw from "rehype-raw"
+import remarkGfm from "remark-gfm"
 
 interface DashboardStats {
   total_bandwidth: number
@@ -30,6 +33,8 @@ export default function DashboardPage() {
   const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [announcements, setAnnouncements] = useState<Array<{ id: string; title: string; description: string; detail: string }>>([])
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true)
   const hasStats = Boolean(stats && stats.total_bandwidth)
 
   useEffect(() => {
@@ -44,7 +49,27 @@ export default function DashboardPage() {
       }
     }
 
+    const fetchNotices = async () => {
+      try {
+        const response = await api.getNotices()
+        const data = response?.data || []
+        setAnnouncements(
+          data.map((notice: any) => ({
+            id: notice.id ?? getSafeId(),
+            title: notice.title ?? "站点公告",
+            description: notice.summary || notice.description || "",
+            detail: notice.content ?? notice.description ?? "",
+          })),
+        )
+      } catch (error) {
+        console.error("Failed to fetch announcements:", error)
+      } finally {
+        setAnnouncementsLoading(false)
+      }
+    }
+
     fetchStats()
+    fetchNotices()
   }, [])
 
   const formatBytes = (bytes: number) => {
@@ -63,30 +88,7 @@ export default function DashboardPage() {
   const totalText = hasStats ? formatBytes(stats!.total_bandwidth) : "—"
   const usageLabel = hasStats ? `${usagePercentage}%` : "--"
 
-  const announcements = [
-    {
-      title: "节点维护",
-      description: "节点状态每 30 秒自动刷新，如发现异常请在工单中心反馈。",
-      detail:
-        "为了保证服务体验，我们对部分节点进行分批维护，刷新周期为 30 秒。如出现连接异常或无法使用，请在工单中心反馈，我们会第一时间响应。",
-    },
-    {
-      title: "流量提示",
-      description: stats
-        ? `当前已使用 ${formatBytes(stats.used_bandwidth)}，请关注剩余流量。`
-        : "正在获取您的流量信息，请稍候。",
-      detail:
-        "系统会根据您的历史使用情况发出流量提醒，若已接近上限，建议及时续费或升级套餐，避免影响日常使用。",
-    },
-    {
-      title: "订阅提醒",
-      description: expireDateText
-        ? `当前套餐预计 ${expireDateText} 到期，敬请提前续费。`
-        : "尚未开通订阅，点击下方操作可快速购买套餐。",
-      detail:
-        "当订阅即将到期或未开通时，我们会发送多渠道提醒。您也可以在订阅页面开启自动续费，确保服务不中断。",
-    },
-  ]
+  const activeAnnouncements = announcements.length > 0 ? announcements : []
   const quickActions = [
     {
       label: "购买订阅",
@@ -124,7 +126,7 @@ export default function DashboardPage() {
 
   const [announcementIndex, setAnnouncementIndex] = useState(0)
   const [detailIndex, setDetailIndex] = useState<number | null>(null)
-  const activeAnnouncement = announcements[announcementIndex]
+  const activeAnnouncement = activeAnnouncements[announcementIndex]
 
   const goToAnnouncement = (direction: "prev" | "next") => {
     setAnnouncementIndex((prev) => {
@@ -209,36 +211,52 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground">
                 <span>最新公告</span>
                 <span>
-                  {announcementIndex + 1}/{announcements.length}
+                  {activeAnnouncements.length ? `${announcementIndex + 1}/${activeAnnouncements.length}` : "0/0"}
                 </span>
               </div>
-              <div className="space-y-2">
-                <p className="text-lg font-semibold text-foreground">{activeAnnouncement.title}</p>
-                <p className="leading-relaxed">{activeAnnouncement.description}</p>
-              </div>
-              <div className="flex items-center justify-between gap-2 lg:mt-auto">
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="px-2"
-                    onClick={() => goToAnnouncement("prev")}
-                  >
-                    上一条
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="px-2"
-                    onClick={() => goToAnnouncement("next")}
-                  >
-                    下一条
-                  </Button>
+              {announcementsLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
-                <Button size="sm" onClick={() => setDetailIndex(announcementIndex)}>
-                  查看详情
-                </Button>
-              </div>
+              ) : activeAnnouncements.length === 0 ? (
+                <div className="text-sm text-muted-foreground">暂无公告</div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <p className="text-lg font-semibold text-foreground">{activeAnnouncement.title}</p>
+                    <p className="leading-relaxed">
+                      {activeAnnouncement.description || activeAnnouncement.detail?.slice(0, 80) || "查看详情了解更多"}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 lg:mt-auto">
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="px-2"
+                        onClick={() => goToAnnouncement("prev")}
+                        disabled={!activeAnnouncements.length}
+                      >
+                        上一条
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="px-2"
+                        onClick={() => goToAnnouncement("next")}
+                        disabled={!activeAnnouncements.length}
+                      >
+                        下一条
+                      </Button>
+                    </div>
+                    <Button size="sm" onClick={() => setDetailIndex(announcementIndex)} disabled={!activeAnnouncements.length}>
+                      查看详情
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -317,16 +335,54 @@ export default function DashboardPage() {
       </div>
 
       <Dialog open={detailIndex !== null} onOpenChange={(open) => !open && setDetailIndex(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{detailIndex !== null ? announcements[detailIndex].title : ""}</DialogTitle>
+            <DialogTitle>
+              {detailIndex !== null && activeAnnouncements[detailIndex] ? activeAnnouncements[detailIndex].title : ""}
+            </DialogTitle>
             <DialogDescription>站点公告详情</DialogDescription>
           </DialogHeader>
-          <div className="text-sm leading-relaxed text-muted-foreground">
-            {detailIndex !== null ? announcements[detailIndex].detail : ""}
-          </div>
+          {detailIndex !== null && activeAnnouncements[detailIndex] ? (
+            <div className="prose prose-sm max-w-none text-muted-foreground dark:prose-invert">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  a: ({ node, ...props }) => (
+                    <a {...props} className="text-primary underline decoration-dashed hover:decoration-solid" target="_blank" rel="noreferrer" />
+                  ),
+                  table: ({ node, ...props }) => (
+                    <div className="my-4 overflow-x-auto rounded-lg border">
+                      <table {...props} className="w-full text-sm" />
+                    </div>
+                  ),
+                  code: ({ node, inline, className, children, ...props }) => (
+                    <code
+                      {...props}
+                      className={`rounded bg-muted px-1.5 py-0.5 text-xs font-semibold text-foreground ${className ?? ""}`}
+                    >
+                      {children}
+                    </code>
+                  ),
+                  details: ({ node, ...props }) => (
+                    <details {...props} className="rounded-lg border border-dashed bg-muted/40 px-4 py-2 text-sm" />
+                  ),
+                  summary: ({ node, ...props }) => (
+                    <summary {...props} className="cursor-pointer text-sm font-semibold text-foreground" />
+                  ),
+                  hr: () => <hr className="my-6 border-dashed border-primary/30" />,
+                }}
+              >
+                {activeAnnouncements[detailIndex].detail || activeAnnouncements[detailIndex].description || ""}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">暂无内容</div>
+          )}
         </DialogContent>
       </Dialog>
     </>
   )
 }
+  const getSafeId = () =>
+    typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
