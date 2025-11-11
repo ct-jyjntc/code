@@ -446,17 +446,6 @@ export default function InvitePage() {
         </CardContent>
       </Card>
 
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader>
-          <CardTitle className="text-base">返佣规则</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>• 好友通过您的邀请链接注册后，您将获得返佣资格</p>
-          <p>• 当好友购买订阅时，您将获得订单金额的 10% 作为返佣</p>
-          <p>• 返佣将自动计入您的账户余额，可用于购买订阅</p>
-          <p>• 邀请码永久有效，可重复使用</p>
-        </CardContent>
-      </Card>
     </div>
   )
 }
