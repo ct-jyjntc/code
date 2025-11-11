@@ -163,24 +163,22 @@ export function RegisterForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {hasWhitelist ? (
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="email-local">邮箱前缀</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email-local">邮箱</Label>
+              <div className="flex gap-2">
                 <Input
                   id="email-local"
                   type="text"
-                  placeholder="请输入邮箱前缀"
+                  placeholder="请输入邮箱"
                   value={emailLocal}
                   onChange={(e) => setEmailLocal(e.target.value.replace(/\s+/g, ""))}
+                  className="flex-1"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email-domain">选择邮箱域名</Label>
                 <Select value={selectedDomain} onValueChange={setSelectedDomain}>
-                  <SelectTrigger id="email-domain">
-                    <SelectValue placeholder="请选择域名" />
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="@域名" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent align="end">
                     {whitelist.map((domain) => (
                       <SelectItem key={domain} value={domain}>
                         @{domain}
@@ -189,9 +187,7 @@ export function RegisterForm() {
                   </SelectContent>
                 </Select>
               </div>
-              {emailValue && (
-                <p className="text-xs text-muted-foreground">完整邮箱：{emailValue}</p>
-              )}
+              {emailValue && <p className="text-xs text-muted-foreground">完整邮箱：{emailValue}</p>}
             </div>
           ) : (
             <div className="space-y-2">
