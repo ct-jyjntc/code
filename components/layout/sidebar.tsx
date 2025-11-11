@@ -13,7 +13,6 @@ import {
   Activity,
   LogOut,
   ShieldCheck,
-  Megaphone,
   BookOpen,
   Gift,
 } from "lucide-react"
@@ -29,7 +28,6 @@ const navItems = [
   { href: "/subscribe", label: "订阅商店", icon: CreditCard },
   { href: "/orders", label: "我的订单", icon: ShoppingCart },
   { href: "/nodes", label: "节点状态", icon: Server },
-  { href: "/notices", label: "公告通知", icon: Megaphone },
   { href: "/knowledge", label: "使用文档", icon: BookOpen },
   { href: "/gift-cards", label: "礼品卡", icon: Gift },
   { href: "/invite", label: "我的邀请", icon: Users },
