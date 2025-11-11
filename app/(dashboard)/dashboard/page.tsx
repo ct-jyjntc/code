@@ -161,17 +161,22 @@ export default function DashboardPage() {
         <div className="grid gap-4 lg:grid-cols-12">
           <Card className="lg:col-span-5 lg:flex lg:flex-col">
             <CardHeader>
-              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-6 w-36" />
+              <Skeleton className="h-4 w-48" />
             </CardHeader>
-            <CardContent className="flex flex-1 flex-col gap-3">
-              <div className="flex flex-1 flex-col gap-3 border px-3 py-4">
+            <CardContent className="flex flex-1 flex-col gap-4">
+              <div className="space-y-3 rounded-lg border p-4">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-16 w-full" />
-                <div className="flex items-center justify-between gap-2">
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              <div className="flex flex-col gap-3 rounded-lg border p-4">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-3 w-full" />
+                <div className="flex items-center justify-between text-sm">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-16" />
                 </div>
               </div>
             </CardContent>
@@ -179,14 +184,24 @@ export default function DashboardPage() {
 
           <Card className="lg:col-span-7">
             <CardHeader>
-              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-56" />
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[1, 2].map((i) => (
+                  <div key={i} className="rounded-lg border p-4 space-y-3">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-3 w-full" />
+                  </div>
+                ))}
               </div>
-              <Skeleton className="h-32 w-full" />
+              <div className="rounded-lg border p-4 space-y-3">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-3 w-full" />
+              </div>
             </CardContent>
           </Card>
 
@@ -194,9 +209,12 @@ export default function DashboardPage() {
             <CardHeader>
               <Skeleton className="h-6 w-32" />
             </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
+            <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+                <div key={i} className="rounded-lg border p-4 space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
               ))}
             </CardContent>
           </Card>

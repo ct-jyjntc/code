@@ -217,20 +217,29 @@ export default function InvitePage() {
 
         <div className="grid gap-4 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-4 w-20" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-24" />
-              </CardContent>
+            <Card key={i} className="space-y-2 p-4">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-6 w-16" />
             </Card>
           ))}
         </div>
 
         <Card>
-          <CardContent className="pt-6">
-            <Skeleton className="h-64 w-full" />
+          <CardHeader>
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              {[1, 2].map((item) => (
+                <div key={item} className="rounded-lg border p-3 space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              ))}
+            </div>
+            <Skeleton className="h-40 w-full" />
           </CardContent>
         </Card>
       </div>

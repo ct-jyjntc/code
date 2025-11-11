@@ -104,20 +104,64 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid gap-6 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="mt-4 h-24 w-full" />
-              </CardContent>
-            </Card>
-          ))}
+        <div>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="mt-2 h-4 w-64" />
         </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-56" />
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-2 w-full" />
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="rounded-lg border p-4 space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                ))}
+              </div>
+              <Skeleton className="h-14 w-full" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="rounded-lg border p-4 space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-5 w-28" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     )
   }
