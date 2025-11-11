@@ -5,9 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "Seele Cloud",
+  description: "Seele Cloud 用户控制面板",
   icons: {
     icon: [
       {

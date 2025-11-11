@@ -17,7 +17,7 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            SeeleCloud
+            Seele Cloud
           </h1>
           <p className="text-sm text-muted-foreground">高速稳定的网络加速服务</p>
         </div>

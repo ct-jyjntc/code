@@ -52,7 +52,7 @@ export function Sidebar() {
     <div className="hidden h-screen w-64 flex-col border-r border-border bg-card lg:flex">
       <div className="flex h-16 items-center justify-between border-b border-border px-6">
         <div className="flex flex-col leading-tight">
-          <span className="text-xl font-semibold text-foreground tracking-tight">SeeleCloud</span>
+          <span className="text-xl font-semibold text-foreground tracking-tight">Seele Cloud</span>
           <span className="text-xs uppercase text-muted-foreground tracking-[0.2em]">Control Panel</span>
         </div>
       </div>
