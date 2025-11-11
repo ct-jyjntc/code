@@ -22,7 +22,7 @@ interface KnowledgeArticle {
   title: string
   summary?: string
   body?: string
-  updated_at: string
+  updated_at?: string | number
 }
 
 interface KnowledgeGroup {
@@ -36,6 +36,22 @@ export default function KnowledgePage() {
   const [loading, setLoading] = useState(true)
   const [keyword, setKeyword] = useState("")
   const { toast } = useToast()
+
+  const formatUpdatedAt = (value?: string | number) => {
+    if (value === undefined || value === null) return "--"
+
+    let timestamp = Number(value)
+    if (!Number.isFinite(timestamp)) {
+      const parsed = Date.parse(String(value))
+      if (Number.isNaN(parsed)) return "--"
+      timestamp = parsed
+    } else if (timestamp < 1e12) {
+      timestamp *= 1000
+    }
+
+    const date = new Date(timestamp)
+    return Number.isNaN(date.getTime()) ? "--" : date.toLocaleString("zh-CN")
+  }
 
   useEffect(() => {
     const fetchKnowledge = async () => {
@@ -198,7 +214,7 @@ export default function KnowledgePage() {
                           </div>
                         )}
                         <p className="mt-3 text-xs text-muted-foreground">
-                          最近更新：{new Date(article.updated_at).toLocaleString("zh-CN")}
+                          最近更新：{formatUpdatedAt(article.updated_at)}
                         </p>
                       </AccordionContent>
                     </AccordionItem>
