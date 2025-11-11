@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CaptchaWidget } from "@/components/auth/captcha-widget"
 import { api } from "@/lib/api"
-import { setAuthToken } from "@/lib/auth"
+import { extractAuthToken, setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { getErrorMessage } from "@/lib/errors"
 import { useGuestConfig } from "@/hooks/use-guest-config"
@@ -165,11 +165,12 @@ export function RegisterForm() {
         ...captchaPayload,
       })
 
-      if (!response?.auth_data) {
+      const token = extractAuthToken(response)
+      if (!token) {
         throw new Error("注册响应异常，请稍后重试")
       }
 
-      setAuthToken(response.auth_data)
+      setAuthToken(token)
       toast({ title: "注册成功", description: "欢迎加入！" })
       router.push("/dashboard")
     } catch (error) {

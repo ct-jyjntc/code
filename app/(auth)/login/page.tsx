@@ -1,7 +1,20 @@
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { LoginForm } from "@/components/auth/login-form"
 import Link from "next/link"
+import { isAuthenticated } from "@/lib/auth"
 
 export default function LoginPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.replace("/dashboard")
+    }
+  }, [router])
+
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
       {/* Background gradient effect */}

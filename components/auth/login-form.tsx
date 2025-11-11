@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { CaptchaWidget } from "@/components/auth/captcha-widget"
 import { api } from "@/lib/api"
-import { setAuthToken } from "@/lib/auth"
+import { extractAuthToken, setAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
 import { getErrorMessage } from "@/lib/errors"
 import { useGuestConfig } from "@/hooks/use-guest-config"
@@ -33,15 +33,16 @@ export function LoginForm() {
 
     try {
       const response = await api.login(email, password)
-      if (!response?.auth_data) {
+      const token = extractAuthToken(response)
+      if (!token) {
         throw new Error("认证信息缺失，请重试")
       }
-      setAuthToken(response.auth_data)
+      setAuthToken(token)
       toast({
         title: "登录成功",
         description: "欢迎回来！",
       })
-      router.push("/dashboard")
+      router.replace("/dashboard")
     } catch (error) {
       toast({
         title: "登录失败",

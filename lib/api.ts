@@ -24,7 +24,12 @@ import {
   mockGiftCardRedeemResult,
 } from "./mock-data"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://seele.xiercloud.uk/api/v1"
+const DEFAULT_SERVER_API_BASE_URL = process.env.SEELE_SERVER_API_BASE_URL || "https://seele.xiercloud.uk/api/v1"
+const DEFAULT_BROWSER_API_BASE_URL = "/api/seele"
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  (typeof window === "undefined" ? DEFAULT_SERVER_API_BASE_URL : DEFAULT_BROWSER_API_BASE_URL)
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_API === "true"
 
 const PERIOD_META: Record<
@@ -123,6 +128,11 @@ const safeJsonStringify = (body?: BodyInit | object) => {
   return JSON.stringify(body)
 }
 
+const formatAuthHeader = (token: string) => {
+  if (!token) return token
+  return /^bearer\s/i.test(token) ? token : `Bearer ${token}`
+}
+
 type RegisterPayload = {
   email: string
   password: string
@@ -147,7 +157,7 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   }
 
   if (token) {
-    headers["Authorization"] = token
+    headers["Authorization"] = formatAuthHeader(token)
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -173,7 +183,10 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     if (payload.status !== "success") {
       throw new ApiError(response.status, payload?.message || "Request failed")
     }
-    return payload.data ?? null
+    if ("data" in payload) {
+      const data = (payload as Record<string, unknown>).data
+      return data ?? payload
+    }
   }
 
   return payload
