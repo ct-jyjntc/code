@@ -23,6 +23,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getErrorMessage } from "@/lib/errors"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
 
 interface Ticket {
   id: string
@@ -42,6 +44,8 @@ export default function TicketsPage() {
   const [message, setMessage] = useState("")
   const [priority, setPriority] = useState("0")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [dialogError, setDialogError] = useState<string | null>(null)
+  const [closingTicketId, setClosingTicketId] = useState<string | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -65,11 +69,23 @@ export default function TicketsPage() {
     }
   }
 
+  useEffect(() => {
+    if (!dialogOpen) {
+      setDialogError(null)
+      setSubject("")
+      setMessage("")
+      setPriority("0")
+    }
+  }, [dialogOpen])
+
   const handleCreateTicket = async () => {
+    setDialogError(null)
     if (!subject.trim() || !message.trim()) {
+      const messageText = "标题和内容不能为空"
+      setDialogError(messageText)
       toast({
         title: "请填写完整信息",
-        description: "标题和内容不能为空",
+        description: messageText,
         variant: "destructive",
       })
       return
@@ -83,14 +99,15 @@ export default function TicketsPage() {
         description: "工单已创建，客服将尽快回复",
       })
       setDialogOpen(false)
-      setSubject("")
-      setMessage("")
+      setDialogError(null)
       await fetchTickets()
     } catch (error) {
       console.error("[v0] Failed to create ticket:", error)
+      const messageText = getErrorMessage(error, "无法创建工单，请稍后重试")
+      setDialogError(messageText)
       toast({
         title: "创建失败",
-        description: getErrorMessage(error, "无法创建工单，请稍后重试"),
+        description: messageText,
         variant: "destructive",
       })
     } finally {
@@ -99,6 +116,7 @@ export default function TicketsPage() {
   }
 
   const handleCloseTicket = async (ticketId: string) => {
+    setClosingTicketId(ticketId)
     try {
       await api.closeTicket(ticketId)
       toast({
@@ -113,6 +131,8 @@ export default function TicketsPage() {
         description: getErrorMessage(error, "无法关闭该工单，请稍后重试"),
         variant: "destructive",
       })
+    } finally {
+      setClosingTicketId((prev) => (prev === ticketId ? null : prev))
     }
   }
 
@@ -189,6 +209,11 @@ export default function TicketsPage() {
                 <DialogTitle>创建新工单</DialogTitle>
                 <DialogDescription>描述您遇到的问题，我们的客服团队将尽快回复</DialogDescription>
               </DialogHeader>
+              {dialogError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{dialogError}</AlertDescription>
+                </Alert>
+              )}
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="subject">标题</Label>
@@ -228,7 +253,14 @@ export default function TicketsPage() {
                   取消
                 </Button>
                 <Button onClick={handleCreateTicket} disabled={creating}>
-                  {creating ? "创建中..." : "提交工单"}
+                  {creating ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner />
+                      创建中...
+                    </span>
+                  ) : (
+                    "提交工单"
+                  )}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -306,8 +338,16 @@ export default function TicketsPage() {
                         e.stopPropagation()
                         handleCloseTicket(ticket.id)
                       }}
+                      disabled={closingTicketId === ticket.id}
                     >
-                      关闭工单
+                      {closingTicketId === ticket.id ? (
+                        <span className="flex items-center gap-2">
+                          <Spinner className="size-3.5" />
+                          关闭中...
+                        </span>
+                      ) : (
+                        "关闭工单"
+                      )}
                     </Button>
                   </div>
                 )}

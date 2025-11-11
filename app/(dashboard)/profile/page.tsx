@@ -11,6 +11,8 @@ import { User, Mail, Calendar, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getErrorMessage } from "@/lib/errors"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
 
 interface UserInfo {
   id: string
@@ -27,6 +29,7 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [updatingPassword, setUpdatingPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -90,20 +93,29 @@ export default function ProfilePage() {
   }
 
   const handlePasswordUpdate = async () => {
+    setPasswordError(null)
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({ title: "请填写完整", description: "所有密码字段均为必填", variant: "destructive" })
+      const message = "所有密码字段均为必填"
+      setPasswordError(message)
+      toast({ title: "请填写完整", description: message, variant: "destructive" })
       return
     }
     if (newPassword.length < 8) {
-      toast({ title: "新密码过短", description: "密码长度需至少 8 位", variant: "destructive" })
+      const message = "密码长度需至少 8 位"
+      setPasswordError(message)
+      toast({ title: "新密码过短", description: message, variant: "destructive" })
       return
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: "密码不一致", description: "请确认两次输入一致", variant: "destructive" })
+      const message = "请确认两次输入一致"
+      setPasswordError(message)
+      toast({ title: "密码不一致", description: message, variant: "destructive" })
       return
     }
     if (newPassword === currentPassword) {
-      toast({ title: "无效的新密码", description: "新密码不能与当前密码相同", variant: "destructive" })
+      const message = "新密码不能与当前密码相同"
+      setPasswordError(message)
+      toast({ title: "无效的新密码", description: message, variant: "destructive" })
       return
     }
 
@@ -111,13 +123,16 @@ export default function ProfilePage() {
     try {
       await api.changePassword(currentPassword, newPassword)
       toast({ title: "修改成功", description: "密码已更新，请使用新密码重新登录" })
+      setPasswordError(null)
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
     } catch (error) {
+      const message = getErrorMessage(error, "无法更新密码，请稍后重试")
+      setPasswordError(message)
       toast({
         title: "修改失败",
-        description: getErrorMessage(error, "无法更新密码，请稍后重试"),
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -203,6 +218,11 @@ export default function ProfilePage() {
               <CardDescription>更新您的账户密码</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {passwordError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{passwordError}</AlertDescription>
+                </Alert>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="current-password">当前密码</Label>
                 <Input
@@ -234,7 +254,14 @@ export default function ProfilePage() {
                 />
               </div>
               <Button className="w-full sm:w-auto" onClick={handlePasswordUpdate} disabled={updatingPassword}>
-                {updatingPassword ? "更新中..." : "更新密码"}
+                {updatingPassword ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner />
+                    更新中...
+                  </span>
+                ) : (
+                  "更新密码"
+                )}
               </Button>
             </CardContent>
           </Card>
