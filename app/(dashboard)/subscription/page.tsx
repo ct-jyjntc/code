@@ -72,9 +72,13 @@ export default function SubscriptionPage() {
   const usage = useMemo(() => {
     if (!subscription) return { used: 0, percent: 0 }
     const used = subscription.u + subscription.d
-    const percent = Math.min(100, Math.round((used / subscription.transfer_enable) * 100))
+    const percent = subscription.transfer_enable
+      ? Math.min(100, Math.round((used / subscription.transfer_enable) * 100))
+      : 0
     return { used, percent }
   }, [subscription])
+
+  const effectiveSpeedLimit = subscription?.plan?.speed_limit ?? subscription?.speed_limit ?? null
 
   const formatBytes = (bytes: number) => {
     if (!bytes) return "0 B"
@@ -223,10 +227,10 @@ export default function SubscriptionPage() {
               <div className="rounded-lg border bg-card p-4">
                 <p className="text-sm text-muted-foreground">速率 / 设备</p>
                 <p className="text-xl font-semibold">
-                  {subscription.plan?.speed_limit ? `${subscription.plan.speed_limit} Mbps` : "--"}
+                  {effectiveSpeedLimit ? `${effectiveSpeedLimit} Mbps` : "不限速"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  设备上限 {subscription.plan?.device_limit ?? "--"} 台
+                  设备上限 {subscription.plan?.device_limit ?? subscription.device_limit ?? "--"} 台
                 </p>
               </div>
             </div>

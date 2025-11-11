@@ -9,6 +9,23 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Check, Zap, TrendingUp, Crown } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+interface PlanPeriod {
+  legacyKey: string
+  label: string
+  days: number
+  price: number
+}
 
 interface Plan {
   id: string
@@ -20,12 +37,22 @@ interface Plan {
   features: string[]
   popular?: boolean
   purchase_period?: string
+  available_periods?: PlanPeriod[]
+}
+
+interface OrderInfo {
+  tradeNo: string
+  planName: string
+  periodLabel: string
+  amount: number
 }
 
 export default function SubscribePage() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState<string | null>(null)
+  const [selectedPeriods, setSelectedPeriods] = useState<Record<string, string>>({})
+  const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -34,6 +61,12 @@ export default function SubscribePage() {
       try {
         const data = await api.getPlans()
         setPlans(data)
+        const defaults: Record<string, string> = {}
+        data.forEach((plan) => {
+          const defaultPeriod = plan.available_periods?.[0]?.legacyKey ?? plan.purchase_period ?? "month_price"
+          defaults[plan.id] = defaultPeriod
+        })
+        setSelectedPeriods(defaults)
       } catch (error) {
         console.error("[v0] Failed to fetch plans:", error)
         toast({
@@ -49,15 +82,32 @@ export default function SubscribePage() {
     fetchPlans()
   }, [toast])
 
-  const handlePurchase = async (planId: string, period?: string) => {
-    setPurchasing(planId)
-    try {
-      await api.createOrder(planId, period)
+  const handlePurchase = async (plan: Plan) => {
+    const selectedPeriodKey =
+      selectedPeriods[plan.id] ?? plan.available_periods?.[0]?.legacyKey ?? plan.purchase_period ?? null
+    if (!selectedPeriodKey) {
       toast({
-        title: "购买成功",
-        description: "订单已创建，请前往订单页面查看",
+        title: "缺少周期",
+        description: "该套餐暂不支持购买，请选择其他套餐",
+        variant: "destructive",
       })
-      router.push("/orders")
+      return
+    }
+    const periodDetail = plan.available_periods?.find((item) => item.legacyKey === selectedPeriodKey)
+    setPurchasing(plan.id)
+    try {
+      const result = await api.createOrder(plan.id, selectedPeriodKey)
+      const tradeNo = result.trade_no || "未知订单号"
+      setOrderInfo({
+        tradeNo,
+        planName: plan.name,
+        periodLabel: periodDetail?.label ?? plan.duration_label ?? "默认周期",
+        amount: periodDetail?.price ?? plan.price,
+      })
+      toast({
+        title: "订单已创建",
+        description: `订单号：${tradeNo}，请尽快完成支付`,
+      })
     } catch (error) {
       console.error("[v0] Failed to create order:", error)
       toast({
@@ -111,84 +161,167 @@ export default function SubscribePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-balance text-foreground">购买订阅</h1>
-        <p className="text-muted-foreground">选择适合您的套餐</p>
-      </div>
+    <>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-balance text-foreground">购买订阅</h1>
+          <p className="text-muted-foreground">选择适合您的套餐</p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {plans.map((plan, index) => {
-          const Icon = getPlanIcon(index)
-          return (
-            <Card key={plan.id} className={plan.popular ? "border-primary shadow-lg shadow-primary/20" : ""}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center bg-primary/10">
-                      <Icon className="h-4 w-4 text-primary" />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {plans.map((plan, index) => {
+            const Icon = getPlanIcon(index)
+            const selectedKey =
+              selectedPeriods[plan.id] ?? plan.available_periods?.[0]?.legacyKey ?? plan.purchase_period
+            const selectedPeriod = plan.available_periods?.find((item) => item.legacyKey === selectedKey)
+            const periodLabel = selectedPeriod?.label ?? plan.duration_label ?? `${plan.duration_days} 天`
+            const periodDays = selectedPeriod?.days ?? plan.duration_days
+            const periodPrice = selectedPeriod?.price ?? plan.price
+
+            return (
+              <Card key={plan.id} className={plan.popular ? "border-primary shadow-lg shadow-primary/20" : ""}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center bg-primary/10">
+                        <Icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <CardTitle>{plan.name}</CardTitle>
                     </div>
-                    <CardTitle>{plan.name}</CardTitle>
+                    {plan.popular && <Badge variant="default">热门</Badge>}
                   </div>
-                  {plan.popular && <Badge variant="default">热门</Badge>}
-                </div>
-                <CardDescription>
-                  {(plan.duration_label ?? `${plan.duration_days} 天`)} · {formatBytes(plan.bandwidth)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold">¥{plan.price}</span>
-                  <span className="text-muted-foreground">/{plan.duration_days}天</span>
-                </div>
-                <ul className="space-y-2">
-                  {plan.features?.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  )) || (
-                    <>
-                      <li className="flex items-start gap-2 text-sm">
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className="text-muted-foreground">高速节点访问</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-sm">
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className="text-muted-foreground">{formatBytes(plan.bandwidth)} 流量</span>
-                      </li>
-                      <li className="flex items-start gap-2 text-sm">
-                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                        <span className="text-muted-foreground">{plan.duration_days} 天有效期</span>
-                      </li>
-                    </>
+                  <CardDescription>
+                    {periodLabel} · {formatBytes(plan.bandwidth)}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">¥{periodPrice.toFixed(2)}</span>
+                    <span className="text-muted-foreground">/{periodDays > 0 ? `${periodDays}天` : "一次性"}</span>
+                  </div>
+
+                  {plan.available_periods && plan.available_periods.length > 0 && (
+                    <div className="mb-4 space-y-1">
+                      <Label className="text-xs text-muted-foreground">选择计费周期</Label>
+                      <Select
+                        value={selectedKey}
+                        onValueChange={(value) =>
+                          setSelectedPeriods((prev) => ({
+                            ...prev,
+                            [plan.id]: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="选择计费周期" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {plan.available_periods.map((period) => (
+                            <SelectItem key={period.legacyKey} value={period.legacyKey}>
+                              {period.label} · ¥{period.price.toFixed(2)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={plan.popular ? "default" : "outline"}
-                  onClick={() => handlePurchase(plan.id, plan.purchase_period)}
-                  disabled={purchasing === plan.id}
-                >
-                  {purchasing === plan.id ? "处理中..." : "立即购买"}
-                </Button>
-              </CardFooter>
-            </Card>
-          )
-        })}
+
+                  <ul className="space-y-2">
+                    {plan.features?.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    )) || (
+                      <>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                          <span className="text-muted-foreground">高速节点访问</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                          <span className="text-muted-foreground">{formatBytes(plan.bandwidth)} 流量</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-sm">
+                          <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                          <span className="text-muted-foreground">{periodLabel}</span>
+                        </li>
+                      </>
+                    )}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full"
+                    variant={plan.popular ? "default" : "outline"}
+                    onClick={() => handlePurchase(plan)}
+                    disabled={purchasing === plan.id}
+                  >
+                    {purchasing === plan.id ? "处理中..." : "立即购买"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
+        </div>
+
+        {plans.length === 0 && (
+          <Card>
+            <CardContent className="flex min-h-[200px] items-center justify-center">
+              <div className="text-center">
+                <p className="text-muted-foreground">暂无可用套餐</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {plans.length === 0 && (
-        <Card>
-          <CardContent className="flex min-h-[200px] items-center justify-center">
-            <div className="text-center">
-              <p className="text-muted-foreground">暂无可用套餐</p>
+      <Dialog
+        open={Boolean(orderInfo)}
+        onOpenChange={(open) => {
+          if (!open) setOrderInfo(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>订单已创建</DialogTitle>
+            <DialogDescription>请前往订单中心完成支付</DialogDescription>
+          </DialogHeader>
+          {orderInfo && (
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">订单编号</span>
+                <span className="font-mono text-base">{orderInfo.tradeNo}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">套餐</span>
+                <span>{orderInfo.planName}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">周期</span>
+                <span>{orderInfo.periodLabel}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">应付金额</span>
+                <span className="text-lg font-semibold text-primary">¥{orderInfo.amount.toFixed(2)}</span>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          )}
+          <DialogFooter className="gap-2 sm:gap-3">
+            <Button variant="outline" onClick={() => setOrderInfo(null)}>
+              继续选购
+            </Button>
+            <Button
+              onClick={() => {
+                setOrderInfo(null)
+                router.push("/orders")
+              }}
+            >
+              前往订单
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -4,6 +4,9 @@ import {
   mockDashboardStats,
   mockPlans,
   mockOrders,
+  mockOrderDetail,
+  mockPaymentMethods,
+  mockCheckoutResult,
   mockNodes,
   mockInvites,
   mockTickets,
@@ -37,6 +40,11 @@ const PERIOD_META: Record<
   three_year_price: { label: "三年付", days: 1095 },
   onetime_price: { label: "一次性", days: -1 },
   reset_price: { label: "重置流量", days: -1 },
+}
+
+const getPeriodLabel = (legacyKey?: string) => {
+  if (!legacyKey) return "自定义周期"
+  return PERIOD_META[legacyKey]?.label ?? "自定义周期"
 }
 
 const PERIOD_PRIORITY = [
@@ -84,6 +92,20 @@ const normalizeTimestamp = (value?: string | number | null) => {
 const bytesFromValue = (value?: number | null) => {
   if (value === null || value === undefined) return 0
   return Number(value)
+}
+
+const gbToBytes = (value?: number | null) => {
+  if (value === null || value === undefined) return 0
+  return Number(value) * 1024 * 1024 * 1024
+}
+
+const formatBytes = (bytes?: number) => {
+  const value = bytes ?? 0
+  if (value <= 0) return "0 B"
+  const units = ["B", "KB", "MB", "GB", "TB", "PB"]
+  const index = Math.min(units.length - 1, Math.floor(Math.log(value) / Math.log(1024)))
+  const converted = value / Math.pow(1024, index)
+  return `${converted % 1 === 0 ? converted : converted.toFixed(2)} ${units[index]}`
 }
 
 const pickFirst = <T>(items: T[], predicate?: (item: T) => boolean) => {
@@ -177,11 +199,12 @@ const normalizePlan = (plan: any) => {
     days: 30,
     price: 0,
   }
+  const transferBytes = gbToBytes(plan?.transfer_enable ?? 0)
   const features =
     Array.isArray(plan?.tags) && plan.tags.length > 0
       ? plan.tags
       : [
-          `流量：${plan?.transfer_enable ?? "-"} 单位`,
+          `流量：${transferBytes > 0 ? formatBytes(transferBytes) : "不限"}`,
           plan?.speed_limit ? `限速 ${plan.speed_limit} Mbps` : "不限速",
           plan?.device_limit ? `设备数 ${plan.device_limit} 台` : "设备不限",
         ]
@@ -192,7 +215,7 @@ const normalizePlan = (plan: any) => {
     price: primaryPeriod.price,
     duration_days: primaryPeriod.days,
     duration_label: primaryPeriod.label,
-    bandwidth: bytesFromValue(plan?.transfer_enable ?? 0) * 1024,
+    bandwidth: transferBytes,
     features,
     popular: Boolean(plan?.tags?.includes("popular")),
     purchase_period: primaryPeriod.legacyKey,
@@ -217,13 +240,44 @@ const normalizeOrderStatus = (status?: number) => {
 }
 
 const normalizeOrder = (order: any) => {
+  const id = order?.trade_no ?? String(order?.id ?? "")
   return {
-    id: order?.trade_no ?? String(order?.id ?? ""),
+    id,
+    trade_no: id,
     plan_name: order?.plan?.name ?? `套餐 #${order?.plan_id ?? "-"}`,
     amount: centsToCurrency(order?.total_amount),
     status: normalizeOrderStatus(order?.status),
     created_at: normalizeTimestamp(order?.created_at) ?? new Date().toISOString(),
     paid_at: normalizeTimestamp(order?.paid_at),
+  }
+}
+
+const normalizeOrderDetail = (order: any) => {
+  if (!order) return null
+  const base = normalizeOrder(order)
+  const planDetail = order?.plan
+    ? {
+        id: String(order.plan.id ?? ""),
+        name: order.plan.name ?? base.plan_name,
+        content: order.plan.content,
+        transfer_enable: gbToBytes(order.plan.transfer_enable ?? 0),
+        speed_limit: order.plan.speed_limit,
+        device_limit: order.plan.device_limit,
+      }
+    : undefined
+
+  return {
+    ...base,
+    status_code: order?.status,
+    period: order?.period,
+    period_label: getPeriodLabel(order?.period),
+    total_amount: centsToCurrency(order?.total_amount ?? 0),
+    balance_amount: centsToCurrency(order?.balance_amount ?? 0),
+    handling_amount: centsToCurrency(order?.handling_amount ?? 0),
+    discount_amount: centsToCurrency(order?.discount_amount ?? 0),
+    payable_amount: centsToCurrency((order?.total_amount ?? 0) + (order?.handling_amount ?? 0)),
+    plan_detail: planDetail,
+    raw: order,
   }
 }
 
@@ -238,6 +292,15 @@ const normalizeNode = (node: any) => {
     latency: status === "online" ? Math.round(50 + Math.random() * 80) : 0,
   }
 }
+
+const normalizePaymentMethod = (method: any) => ({
+  id: String(method?.id ?? ""),
+  name: method?.name ?? method?.payment ?? "支付方式",
+  payment: method?.payment ?? "",
+  icon: method?.icon ?? "",
+  handling_fee_percent: Number(method?.handling_fee_percent ?? 0),
+  handling_fee_fixed: centsToCurrency(method?.handling_fee_fixed ?? 0),
+})
 
 const normalizeInviteResponse = (data: any) => {
   const codes = ensureArray<any>(data?.codes)
@@ -347,6 +410,8 @@ const normalizeSubscription = (data: any) => {
     token: data?.token ?? "",
     subscribe_url: data?.subscribe_url ?? "",
     plan: normalizedPlan,
+    speed_limit: data?.speed_limit ?? planData?.speed_limit ?? null,
+    device_limit: data?.device_limit ?? planData?.device_limit ?? null,
     u: bytesFromValue(data?.u),
     d: bytesFromValue(data?.d),
     transfer_enable: bytesFromValue(data?.transfer_enable),
@@ -454,18 +519,67 @@ export const api = {
   createOrder: async (planId: string, period?: string) => {
     if (USE_MOCK_DATA) {
       return {
-        id: "order_mock",
-        status: "pending",
-        payment_url: "https://example.com/pay",
+        trade_no: `mock_order_${Date.now()}`,
       }
     }
-    return fetchWithAuth("/user/order/save", {
+    const response = await fetchWithAuth("/user/order/save", {
       method: "POST",
       body: {
         plan_id: planId,
         period: period ?? "month_price",
       },
     })
+    if (typeof response === "string") {
+      return { trade_no: response }
+    }
+    if (response?.trade_no) {
+      return { trade_no: response.trade_no }
+    }
+    return { trade_no: "" }
+  },
+
+  getOrderDetail: async (tradeNo: string) => {
+    if (USE_MOCK_DATA) return normalizeOrderDetail(mockOrderDetail)
+    const response = await fetchWithAuth(`/user/order/detail?trade_no=${tradeNo}`)
+    return normalizeOrderDetail(response)
+  },
+
+  getPaymentMethods: async () => {
+    if (USE_MOCK_DATA) return mockPaymentMethods.map(normalizePaymentMethod)
+    const methods = await fetchWithAuth("/user/order/getPaymentMethod")
+    return ensureArray(methods).map(normalizePaymentMethod)
+  },
+
+  checkoutOrder: async (tradeNo: string, methodId: string) => {
+    if (USE_MOCK_DATA) return mockCheckoutResult
+    const result = await fetchWithAuth("/user/order/checkout", {
+      method: "POST",
+      body: {
+        trade_no: tradeNo,
+        method: methodId,
+      },
+    })
+    return {
+      type: typeof result?.type === "number" ? result.type : -1,
+      data: result?.data ?? null,
+    }
+  },
+
+  checkOrderStatus: async (tradeNo: string) => {
+    if (USE_MOCK_DATA) return { status: "completed" }
+    const status = await fetchWithAuth(`/user/order/check?trade_no=${tradeNo}`)
+    return {
+      status: normalizeOrderStatus(typeof status === "number" ? status : Number(status)),
+    }
+  },
+
+  cancelOrder: async (tradeNo: string) => {
+    if (USE_MOCK_DATA) return { success: true }
+    await fetchWithAuth("/user/order/cancel", {
+      method: "POST",
+      body: { trade_no: tradeNo },
+    })
+    return { success: true }
   },
 
   // Nodes

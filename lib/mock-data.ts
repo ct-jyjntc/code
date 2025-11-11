@@ -92,6 +92,51 @@ export const mockOrders = [
   },
 ]
 
+export const mockOrderDetail = {
+  trade_no: "order_003",
+  plan_id: 2,
+  plan: {
+    id: 2,
+    name: "标准版",
+    transfer_enable: 322122547200,
+    speed_limit: 300,
+    device_limit: 5,
+    content: "300GB 月流量 · 极速专线 · Netflix 解锁",
+  },
+  total_amount: 3999,
+  handling_amount: 0,
+  balance_amount: 0,
+  discount_amount: 0,
+  period: "month_price",
+  status: 0,
+  created_at: "2025-01-10T09:15:00.000Z",
+  paid_at: null,
+}
+
+export const mockPaymentMethods = [
+  {
+    id: 1,
+    name: "测试收款",
+    payment: "MockPay",
+    icon: "",
+    handling_fee_fixed: 0,
+    handling_fee_percent: 0,
+  },
+  {
+    id: 2,
+    name: "二维码支付",
+    payment: "MockQr",
+    icon: "",
+    handling_fee_fixed: 0,
+    handling_fee_percent: 0,
+  },
+]
+
+export const mockCheckoutResult = {
+  type: 0,
+  data: "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=mock-payment",
+}
+
 export const mockNodes = [
   {
     id: "node_1",
