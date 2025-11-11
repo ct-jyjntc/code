@@ -366,7 +366,7 @@ export default function DashboardPage() {
       </div>
 
       <Dialog open={detailIndex !== null} onOpenChange={(open) => !open && setDetailIndex(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[min(90vh,800px)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {detailIndex !== null && activeAnnouncements[detailIndex] ? activeAnnouncements[detailIndex].title : ""}

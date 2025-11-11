@@ -424,7 +424,7 @@ export default function OrdersPage() {
           if (!open) handleCloseDialog()
         }}
       >
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[min(90vh,800px)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>订单详情</DialogTitle>
             <DialogDescription>订单编号：{orderDetail?.trade_no ?? orderDetail?.id ?? "--"}</DialogDescription>

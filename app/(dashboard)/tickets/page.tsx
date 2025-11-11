@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { MessageSquare, Plus, Clock } from "lucide-react"
+import { MessageSquare, Plus, Clock, ImagePlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import {
@@ -46,8 +46,10 @@ export default function TicketsPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [dialogError, setDialogError] = useState<string | null>(null)
   const [closingTicketId, setClosingTicketId] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     fetchTickets()
@@ -75,8 +77,50 @@ export default function TicketsPage() {
       setSubject("")
       setMessage("")
       setPriority("0")
+      setUploadingImage(false)
     }
   }, [dialogOpen])
+
+  const handleUploadImage = async (file: File) => {
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append("source", file)
+
+      const response = await fetch("/api/picgo", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error(`上传失败（${response.status}）`)
+      }
+
+      const data = await response.json()
+      const imageUrl =
+        data?.image?.url || data?.image?.image?.url || data?.image?.display_url || data?.image?.thumb?.url || data?.image?.url_viewer
+
+      if (!imageUrl) {
+        throw new Error("图床未返回图片地址")
+      }
+
+      setMessage((prev) => {
+        const addition = `![图片](${imageUrl})`
+        return prev.trim().length > 0 ? `${prev.trimEnd()}\n\n${addition}\n` : `${addition}\n`
+      })
+
+      toast({ title: "图片上传成功", description: "已插入 Markdown，可直接提交" })
+    } catch (error) {
+      console.error("Upload image failed:", error)
+      toast({
+        title: "上传失败",
+        description: getErrorMessage(error, "无法上传图片，请稍后重试"),
+        variant: "destructive",
+      })
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   const handleCreateTicket = async () => {
     setDialogError(null)
@@ -204,7 +248,7 @@ export default function TicketsPage() {
                 创建工单
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px]">
+            <DialogContent className="sm:max-w-[525px] max-h-[min(90vh,700px)] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>创建新工单</DialogTitle>
                 <DialogDescription>描述您遇到的问题，我们的客服团队将尽快回复</DialogDescription>
@@ -232,7 +276,34 @@ export default function TicketsPage() {
                     rows={6}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
+                    className="break-all"
                   />
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage || creating}>
+                      {uploadingImage ? (
+                        <span className="flex items-center gap-2">
+                          <Spinner className="size-4" /> 上传中...
+                        </span>
+                      ) : (
+                        <>
+                          <ImagePlus className="mr-2 h-4 w-4" /> 上传图片
+                        </>
+                      )}
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0]
+                        if (file) {
+                          handleUploadImage(file)
+                          event.target.value = ""
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="priority">优先级</Label>

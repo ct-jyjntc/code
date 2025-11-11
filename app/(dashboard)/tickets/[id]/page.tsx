@@ -315,6 +315,7 @@ export default function TicketDetailPage() {
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               disabled={awaitingSupportReply || sending}
+              className="break-all"
             />
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">

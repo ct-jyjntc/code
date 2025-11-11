@@ -294,7 +294,7 @@ export default function SubscribePage() {
           if (!open) setOrderInfo(null)
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-h-[min(90vh,700px)] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>订单已创建</DialogTitle>
             <DialogDescription>请前往订单中心完成支付</DialogDescription>
