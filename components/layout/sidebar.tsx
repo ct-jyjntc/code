@@ -14,6 +14,7 @@ import {
   LogOut,
   ShieldCheck,
   BookOpen,
+  Signal,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/subscription", label: "我的订阅", icon: ShieldCheck },
   { href: "/subscribe", label: "订阅商店", icon: CreditCard },
   { href: "/orders", label: "我的订单", icon: ShoppingCart },
+  { href: "/realtime", label: "实时流量", icon: Signal },
   { href: "/nodes", label: "节点状态", icon: Server },
   { href: "/knowledge", label: "使用文档", icon: BookOpen },
   { href: "/invite", label: "我的邀请", icon: Users },
