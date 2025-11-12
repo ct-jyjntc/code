@@ -233,8 +233,8 @@ export default function SubscriptionPage() {
                 <span>已使用 {formatBytes(usage.used)}</span>
                 <span>总计 {formatBytes(subscription.transfer_enable)}</span>
               </div>
-              <div className="mt-2 h-2 w-full rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${usage.percent}%` }} />
+              <div className="mt-2 h-2 w-full bg-muted">
+                <div className="h-full bg-primary" style={{ width: `${usage.percent}%` }} />
               </div>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
