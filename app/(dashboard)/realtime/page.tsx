@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
-const DEFAULT_BASE_URL = "http://8.218.248.238:25774"
-const DEFAULT_WS_URL = "ws://8.218.248.238:25774/api/clients"
+const DEFAULT_BASE_URL = "https://komari.xiercloud.uk"
+const DEFAULT_WS_URL = "wss://komari.xiercloud.uk/api/clients"
 const DEFAULT_API_KEY = "komari-nRVg6wXYN5SbwK1Q02LsW2jh8SaFIqJD"
 
 const KOMARI_API_BASE = process.env.NEXT_PUBLIC_KOMARI_BASE_URL ?? DEFAULT_BASE_URL
