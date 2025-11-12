@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
-import { Copy, RefreshCw, ShieldCheck, TimerReset } from "lucide-react"
+import { Check, Copy, Loader2, RefreshCw, ShieldCheck, TimerReset } from "lucide-react"
 import { getErrorMessage } from "@/lib/errors"
 
 interface SubscriptionInfo {
@@ -35,7 +35,9 @@ interface SubscriptionInfo {
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null)
   const [loading, setLoading] = useState(true)
-  const [action, setAction] = useState<"reset">()
+  const [action, setAction] = useState<"reset" | null>(null)
+  const [copyState, setCopyState] = useState<"idle" | "copying" | "copied">("idle")
+  const copyResetRef = useRef<NodeJS.Timeout | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -78,10 +80,32 @@ export default function SubscriptionPage() {
   }
 
   const handleCopySubscribe = async () => {
-    if (!subscription?.subscribe_url) return
-    await navigator.clipboard.writeText(subscription.subscribe_url)
-    toast({ title: "复制成功", description: "订阅链接已复制到剪贴板" })
+    if (!subscription?.subscribe_url || copyState === "copying") return
+    setCopyState("copying")
+    try {
+      await navigator.clipboard.writeText(subscription.subscribe_url)
+      setCopyState("copied")
+      toast({ title: "复制成功", description: "订阅链接已复制到剪贴板" })
+    } catch (error) {
+      console.error("Failed to copy subscribe url:", error)
+      setCopyState("idle")
+      toast({
+        title: "复制失败",
+        description: getErrorMessage(error, "无法复制订阅链接，请稍后重试。"),
+        variant: "destructive",
+      })
+      return
+    } finally {
+      if (copyResetRef.current) clearTimeout(copyResetRef.current)
+      copyResetRef.current = setTimeout(() => setCopyState("idle"), 2000)
+    }
   }
+
+  useEffect(() => {
+    return () => {
+      if (copyResetRef.current) clearTimeout(copyResetRef.current)
+    }
+  }, [])
 
   const handleResetSecurity = async () => {
     setAction("reset")
@@ -97,7 +121,7 @@ export default function SubscriptionPage() {
         variant: "destructive",
       })
     } finally {
-      setAction(undefined)
+      setAction(null)
     }
   }
 
@@ -251,16 +275,27 @@ export default function SubscriptionPage() {
               value={subscription.subscribe_url}
               className="h-32 w-full resize-none font-mono text-sm break-all"
             />
-            <Button className="w-full" variant="secondary" onClick={handleCopySubscribe}>
-              <Copy className="mr-2 h-4 w-4" />
-              复制订阅链接
+            <Button
+              className="w-full"
+              variant="secondary"
+              onClick={handleCopySubscribe}
+              disabled={copyState === "copying"}
+            >
+              {copyState === "copying" ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : copyState === "copied" ? (
+                <Check className="mr-2 h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="mr-2 h-4 w-4" />
+              )}
+              {copyState === "copied" ? "已复制" : "复制订阅链接"}
             </Button>
             <Button className="w-full" onClick={handleResetSecurity} disabled={action === "reset"}>
               <RefreshCw
                 className={`mr-2 h-4 w-4 ${action === "reset" ? "animate-spin" : ""}`}
                 aria-hidden={action !== "reset"}
               />
-              重新生成链接
+              {action === "reset" ? "重新生成中..." : "重新生成链接"}
             </Button>
           </CardContent>
         </Card>

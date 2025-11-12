@@ -123,4 +123,18 @@
     @apply text-foreground;
     background-color: transparent;
   }
+
+  button,
+  [role='button'],
+  a,
+  summary,
+  select,
+  input[type='checkbox'],
+  input[type='radio'],
+  label:has(input[type='checkbox']),
+  label:has(input[type='radio']),
+  .cursor-pointer,
+  .clickable {
+    cursor: pointer;
+  }
 }
