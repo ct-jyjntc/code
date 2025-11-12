@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Activity, AlertTriangle, Download, Upload, Wifi } from "lucide-react"
+import { Activity, AlertTriangle, Wifi } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -38,15 +38,14 @@ type NodeRealtime = {
 
 type ConnectionState = "connecting" | "connected" | "disconnected" | "error"
 
-const formatBytes = (bytes: number) => {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B"
-  const units = ["B", "KB", "MB", "GB", "TB", "PB"]
-  const index = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)))
-  const value = bytes / Math.pow(1024, index)
-  return `${value >= 100 || value % 1 === 0 ? value.toFixed(0) : value.toFixed(2)} ${units[index]}`
+const formatSpeed = (bytesPerSecond: number) => {
+  if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0) return "0 B/s"
+  const units = ["B/s", "KB/s", "MB/s", "GB/s", "TB/s"]
+  const index = Math.min(units.length - 1, Math.floor(Math.log(bytesPerSecond) / Math.log(1024)))
+  const value = bytesPerSecond / Math.pow(1024, index)
+  const formatted = value >= 100 || value % 1 === 0 ? value.toFixed(0) : value.toFixed(2)
+  return `${formatted} ${units[index]}`
 }
-
-const formatSpeed = (bytesPerSecond: number) => `${formatBytes(bytesPerSecond)}/s`
 
 const buildWsUrl = () => {
   try {
@@ -258,19 +257,6 @@ export default function RealtimeTrafficPage() {
     return traffic.filter((node) => Boolean(nodeMeta[node.uuid]))
   }, [traffic, nodeMeta])
 
-  const summary = useMemo(() => {
-    return filteredTraffic.reduce(
-      (acc, node) => {
-        acc.up += node.network.up
-        acc.down += node.network.down
-        acc.totalUp += node.network.totalUp
-        acc.totalDown += node.network.totalDown
-        return acc
-      },
-      { up: 0, down: 0, totalUp: 0, totalDown: 0 },
-    )
-  }, [filteredTraffic])
-
   const renderStatusBadge = () => {
     const map: Record<ConnectionState, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> =
       {
@@ -325,22 +311,12 @@ export default function RealtimeTrafficPage() {
         {filteredTraffic.map((node) => {
           const meta = nodeMeta[node.uuid]
           return (
-            <Card key={node.uuid} className={node.isOnline ? "border-primary/40" : undefined}>
-              <CardHeader className="space-y-2">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg text-foreground">{meta?.name ?? node.uuid}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {meta?.region || meta?.group || "未分组"} · {node.uuid.slice(0, 8)}
-                    </p>
-                  </div>
-                  <Badge variant={node.isOnline ? "default" : "secondary"}>{node.isOnline ? "在线" : "离线"}</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  更新于 {node.updatedAt ? new Date(node.updatedAt).toLocaleString() : "—"}
-                </p>
+            <Card key={node.uuid} className="border-border/80">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-lg text-foreground">{meta?.name ?? node.uuid}</CardTitle>
+                <Badge variant={node.isOnline ? "default" : "secondary"}>{node.isOnline ? "在线" : "离线"}</Badge>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">实时上行</span>
                   <span className="font-semibold text-foreground">{formatSpeed(node.network.up)}</span>
@@ -348,22 +324,6 @@ export default function RealtimeTrafficPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">实时下行</span>
                   <span className="font-semibold text-foreground">{formatSpeed(node.network.down)}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-lg border border-border/70 p-3">
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Upload className="h-4 w-4" />
-                      累计上行
-                    </p>
-                    <p className="mt-1 text-base font-semibold">{formatBytes(node.network.totalUp)}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/70 p-3">
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Download className="h-4 w-4" />
-                      累计下行
-                    </p>
-                    <p className="mt-1 text-base font-semibold">{formatBytes(node.network.totalDown)}</p>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -375,46 +335,21 @@ export default function RealtimeTrafficPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-balance text-foreground">实时流量</h1>
-        <p className="text-muted-foreground">通过 WebSocket 实时洞察节点上行/下行速率与累计流量。</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">连接状态</CardTitle>
-            <Wifi className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-bold text-foreground">{renderStatusBadge()}</div>
-            <p className="text-xs text-muted-foreground">
-              上次更新：{lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleString() : "等待数据"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">实时总上行</CardTitle>
-            <Upload className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatSpeed(summary.up)}</div>
-            <p className="text-xs text-muted-foreground">当前所有在线节点上行速率</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">实时总下行</CardTitle>
-            <Download className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{formatSpeed(summary.down)}</div>
-            <p className="text-xs text-muted-foreground">当前所有在线节点下行速率</p>
-          </CardContent>
-        </Card>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-balance text-foreground">实时流量</h1>
+          <p className="text-muted-foreground">展示入口节点的实时上下行数据。</p>
+        </div>
+        <div className="space-y-1 text-right">
+          <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
+            <Wifi className="h-4 w-4" />
+            <span>连接状态</span>
+            {renderStatusBadge()}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            上次更新：{lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleString() : "等待数据"}
+          </p>
+        </div>
       </div>
 
       {errorMessage && (

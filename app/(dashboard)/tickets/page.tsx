@@ -198,7 +198,7 @@ export default function TicketsPage() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">我的工单</h1>
             <p className="text-muted-foreground">查看和管理您的支持工单</p>
           </div>
@@ -224,7 +224,7 @@ export default function TicketsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-balance text-foreground">我的工单</h1>
           <p className="text-muted-foreground">查看和管理您的支持工单</p>
         </div>

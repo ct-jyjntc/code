@@ -181,7 +181,7 @@ export default function SubscriptionPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold text-balance text-foreground">我的订阅</h1>
         <p className="text-muted-foreground">查看订阅详情、管理安全信息与活跃会话</p>
       </div>

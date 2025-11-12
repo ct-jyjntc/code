@@ -55,7 +55,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">个人中心</h1>
           <p className="text-muted-foreground">管理您的账户信息</p>
         </div>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold text-balance text-foreground">个人中心</h1>
         <p className="text-muted-foreground">管理您的账户信息</p>
       </div>

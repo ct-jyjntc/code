@@ -140,7 +140,7 @@ export default function SubscribePage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">购买订阅</h1>
           <p className="text-muted-foreground">选择适合您的套餐</p>
         </div>
@@ -169,7 +169,7 @@ export default function SubscribePage() {
   return (
     <>
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-balance text-foreground">购买订阅</h1>
           <p className="text-muted-foreground">选择适合您的套餐</p>
         </div>

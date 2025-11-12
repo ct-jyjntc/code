@@ -80,7 +80,7 @@ export default function TrafficPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">流量明细</h1>
           <p className="text-muted-foreground">查看您的流量使用记录</p>
         </div>
@@ -109,7 +109,7 @@ export default function TrafficPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold text-balance text-foreground">流量明细</h1>
         <p className="text-muted-foreground">查看您的流量使用记录</p>
       </div>

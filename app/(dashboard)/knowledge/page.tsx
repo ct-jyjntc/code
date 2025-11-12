@@ -100,7 +100,7 @@ export default function KnowledgePage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-balance text-foreground">使用文档</h1>
           <p className="text-muted-foreground">常见问题、客户端配置与操作指导</p>
         </div>

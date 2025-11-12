@@ -58,7 +58,7 @@ export default function NodesPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">节点状态</h1>
           <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
         </div>
@@ -82,7 +82,7 @@ export default function NodesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold text-balance text-foreground">节点状态</h1>
         <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
       </div>

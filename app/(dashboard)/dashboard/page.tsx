@@ -153,7 +153,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">仪表盘</h1>
           <p className="text-muted-foreground">欢迎回来，查看您的账户概览</p>
         </div>
@@ -226,12 +226,12 @@ export default function DashboardPage() {
   return (
     <>
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-balance text-foreground">仪表盘</h1>
           <p className="text-muted-foreground">欢迎回来，查看您的账户概览</p>
-      </div>
+        </div>
 
-      <div className="grid gap-4 lg:grid-cols-12 lg:items-stretch">
+        <div className="grid gap-4 lg:grid-cols-12 lg:items-stretch">
         <Card className="lg:col-span-5 lg:flex lg:flex-col">
           <CardHeader>
             <CardTitle>站点公告</CardTitle>
@@ -363,7 +363,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      </div>
+    </div>
 
       <Dialog open={detailIndex !== null} onOpenChange={(open) => !open && setDetailIndex(null)}>
         <DialogContent className="max-w-3xl max-h-[min(90vh,800px)] overflow-y-auto">

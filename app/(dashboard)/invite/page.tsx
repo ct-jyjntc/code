@@ -211,7 +211,7 @@ export default function InvitePage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">我的邀请</h1>
           <p className="text-muted-foreground">邀请好友并获得返佣</p>
         </div>
@@ -249,7 +249,7 @@ export default function InvitePage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold text-balance text-foreground">我的邀请</h1>
         <p className="text-muted-foreground">邀请好友并获得返佣</p>
       </div>

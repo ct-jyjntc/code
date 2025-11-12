@@ -318,7 +318,7 @@ export default function OrdersPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">我的订单</h1>
           <p className="text-muted-foreground">查看您的购买记录</p>
         </div>
@@ -342,7 +342,7 @@ export default function OrdersPage() {
   return (
     <>
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-balance text-foreground">我的订单</h1>
           <p className="text-muted-foreground">查看您的购买记录并完成支付</p>
         </div>
