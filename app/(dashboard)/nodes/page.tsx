@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Server, Globe } from "lucide-react"
+import { Server, Globe, SignalHigh } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { getErrorMessage } from "@/lib/errors"
 
@@ -58,9 +58,16 @@ export default function NodesPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">节点状态</h1>
-          <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">节点状态</h1>
+            <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -82,9 +89,22 @@ export default function NodesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-balance text-foreground">节点状态</h1>
-        <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-balance text-foreground">节点状态</h1>
+          <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <span>
+            总节点数：<span className="font-semibold text-foreground">{nodes.length}</span>
+          </span>
+          <span>
+            在线：<span className="font-semibold text-foreground">{nodes.filter((node) => node.status === "online").length}</span>
+          </span>
+          <span>
+            离线：<span className="font-semibold text-foreground">{nodes.filter((node) => node.status === "offline").length}</span>
+          </span>
+        </div>
       </div>
 
       {nodes.length === 0 ? (

@@ -128,9 +128,9 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="mt-2 h-4 w-64" />
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-balance text-foreground">我的订阅</h1>
+          <p className="text-muted-foreground">查看订阅详情、管理安全信息与活跃会话</p>
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
