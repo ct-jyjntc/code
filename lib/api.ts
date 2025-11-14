@@ -88,6 +88,19 @@ const ensureArray = <T>(value: unknown): T[] => {
   return []
 }
 
+export type CouponInfo = {
+  id: string
+  code: string
+  name: string
+  type: "amount" | "percent"
+  value: number
+  raw_value: number
+  limit_plan_ids: string[] | null
+  limit_period: string[] | null
+  started_at?: string
+  ended_at?: string
+}
+
 const normalizeTimestamp = (value?: string | number | null) => {
   if (value === null || value === undefined) return undefined
   const numeric = Number(value)
@@ -110,6 +123,22 @@ const bytesFromValue = (value?: number | null) => {
 const gbToBytes = (value?: number | null) => {
   if (value === null || value === undefined) return 0
   return Number(value) * 1024 * 1024 * 1024
+}
+
+const toStringArray = (value: any): string[] | null => {
+  if (!value) return null
+  if (Array.isArray(value)) {
+    const formatted = value.map((item) => String(item)).filter((item) => item.length > 0)
+    return formatted.length ? formatted : null
+  }
+  if (typeof value === "string") {
+    const formatted = value
+      .split(/[;,]/)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0)
+    return formatted.length ? formatted : null
+  }
+  return null
 }
 
 const formatBytes = (bytes?: number) => {
@@ -254,6 +283,23 @@ const normalizePlan = (plan: any) => {
     popular: Boolean(plan?.tags?.includes("popular")),
     purchase_period: primaryPeriod.legacyKey,
     available_periods: periods,
+  }
+}
+
+const normalizeCoupon = (coupon: any): CouponInfo => {
+  const type: CouponInfo["type"] = coupon?.type === 2 ? "percent" : "amount"
+  const rawValue = Number(coupon?.value ?? 0)
+  return {
+    id: String(coupon?.id ?? ""),
+    code: coupon?.code ?? "",
+    name: coupon?.name ?? "",
+    type,
+    value: type === "amount" ? centsToCurrency(rawValue) : rawValue,
+    raw_value: rawValue,
+    limit_plan_ids: toStringArray(coupon?.limit_plan_ids),
+    limit_period: toStringArray(coupon?.limit_period),
+    started_at: normalizeTimestamp(coupon?.started_at),
+    ended_at: normalizeTimestamp(coupon?.ended_at),
   }
 }
 
@@ -605,24 +651,54 @@ export const api = {
     return plans.map(normalizePlan)
   },
 
+  checkCoupon: async (code: string, planId: string, period: string): Promise<CouponInfo> => {
+    if (USE_MOCK_DATA) {
+      return {
+        id: "mock_coupon",
+        code,
+        name: "示例折扣码",
+        type: "amount",
+        value: 10,
+        raw_value: 1000,
+        limit_plan_ids: null,
+        limit_period: null,
+        started_at: new Date().toISOString(),
+        ended_at: undefined,
+      }
+    }
+    const data = await fetchWithAuth("/user/coupon/check", {
+      method: "POST",
+      body: {
+        code,
+        plan_id: planId,
+        period,
+      },
+    })
+    return normalizeCoupon(data)
+  },
+
   getOrders: async () => {
     if (USE_MOCK_DATA) return mockOrders
     const response = await fetchWithAuth("/user/order/fetch")
     return unwrapCollection(response).map(normalizeOrder)
   },
 
-  createOrder: async (planId: string, period?: string) => {
+  createOrder: async (planId: string, period?: string, couponCode?: string) => {
     if (USE_MOCK_DATA) {
       return {
         trade_no: `mock_order_${Date.now()}`,
       }
     }
+    const body: Record<string, unknown> = {
+      plan_id: planId,
+      period: period ?? "month_price",
+    }
+    if (couponCode) {
+      body.coupon_code = couponCode
+    }
     const response = await fetchWithAuth("/user/order/save", {
       method: "POST",
-      body: {
-        plan_id: planId,
-        period: period ?? "month_price",
-      },
+      body,
     })
     if (typeof response === "string") {
       return { trade_no: response }

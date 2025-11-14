@@ -5,12 +5,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { api } from "@/lib/api"
+import type { CouponInfo } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Check, Zap, TrendingUp, Crown } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -50,6 +52,25 @@ interface OrderInfo {
   amount: number
 }
 
+type CouponStatus = "idle" | "loading" | "valid" | "error"
+
+interface CouponState {
+  code: string
+  status: CouponStatus
+  message?: string
+  data?: CouponInfo
+}
+
+const calculateDiscount = (price: number, coupon?: CouponInfo) => {
+  if (!coupon) return { discount: 0, finalPrice: price }
+  const rawDiscount = coupon.type === "amount" ? coupon.value : (price * coupon.value) / 100
+  const discount = Math.min(price, Math.max(rawDiscount, 0))
+  return {
+    discount,
+    finalPrice: Math.max(price - discount, 0),
+  }
+}
+
 export default function SubscribePage() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,6 +78,7 @@ export default function SubscribePage() {
   const [selectedPeriods, setSelectedPeriods] = useState<Record<string, string>>({})
   const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null)
   const [errorDialog, setErrorDialog] = useState<{ title: string; description: string } | null>(null)
+  const [couponStates, setCouponStates] = useState<Record<string, CouponState>>({})
   const { toast } = useToast()
   const router = useRouter()
 
@@ -86,9 +108,17 @@ export default function SubscribePage() {
     fetchPlans()
   }, [toast])
 
+  const resolveSelectedPeriodKey = (plan: Plan) =>
+    selectedPeriods[plan.id] ?? plan.available_periods?.[0]?.legacyKey ?? plan.purchase_period ?? null
+
+  const getAppliedCoupon = (planId: string) => {
+    const state = couponStates[planId]
+    if (state?.status !== "valid") return undefined
+    return state.data
+  }
+
   const handlePurchase = async (plan: Plan) => {
-    const selectedPeriodKey =
-      selectedPeriods[plan.id] ?? plan.available_periods?.[0]?.legacyKey ?? plan.purchase_period ?? null
+    const selectedPeriodKey = resolveSelectedPeriodKey(plan)
     if (!selectedPeriodKey) {
       toast({
         title: "缺少周期",
@@ -98,15 +128,27 @@ export default function SubscribePage() {
       return
     }
     const periodDetail = plan.available_periods?.find((item) => item.legacyKey === selectedPeriodKey)
+    const appliedCoupon = getAppliedCoupon(plan.id)
+    const { finalPrice } = calculateDiscount(periodDetail?.price ?? plan.price, appliedCoupon)
+    const couponCode = couponStates[plan.id]?.code?.trim() || undefined
     setPurchasing(plan.id)
     try {
-      const result = await api.createOrder(plan.id, selectedPeriodKey)
+      const result = await api.createOrder(plan.id, selectedPeriodKey, couponCode)
       const tradeNo = result.trade_no || "未知订单号"
+      let payableAmount = finalPrice
+      try {
+        const detail = await api.getOrderDetail(tradeNo)
+        if (detail?.payable_amount !== undefined) {
+          payableAmount = detail.payable_amount
+        }
+      } catch (detailError) {
+        console.warn("[subscribe] Failed to fetch order detail:", detailError)
+      }
       setOrderInfo({
         tradeNo,
         planName: plan.name,
         periodLabel: periodDetail?.label ?? plan.duration_label ?? "默认周期",
-        amount: periodDetail?.price ?? plan.price,
+        amount: payableAmount,
       })
       toast({
         title: "订单已创建",
@@ -121,6 +163,84 @@ export default function SubscribePage() {
     } finally {
       setPurchasing(null)
     }
+  }
+
+  const handleCouponValidate = async (plan: Plan) => {
+    const selectedPeriodKey = resolveSelectedPeriodKey(plan)
+    if (!selectedPeriodKey) {
+      toast({
+        title: "缺少周期",
+        description: "请先选择计费周期",
+        variant: "destructive",
+      })
+      return
+    }
+    const code = couponStates[plan.id]?.code?.trim()
+    if (!code) {
+      toast({
+        title: "请输入折扣码",
+        description: "请填写折扣码后再验证",
+      })
+      return
+    }
+    setCouponStates((prev) => ({
+      ...prev,
+      [plan.id]: {
+        code,
+        status: "loading",
+      },
+    }))
+    try {
+      const coupon = await api.checkCoupon(code, plan.id, selectedPeriodKey)
+      setCouponStates((prev) => ({
+        ...prev,
+        [plan.id]: {
+          code,
+          status: "valid",
+          data: coupon,
+          message: "优惠券可用",
+        },
+      }))
+      toast({
+        title: "验证成功",
+        description: `${coupon.name || code} 可以用于本次购买`,
+      })
+    } catch (error) {
+      const message = getErrorMessage(error, "优惠券不可用")
+      setCouponStates((prev) => ({
+        ...prev,
+        [plan.id]: {
+          code,
+          status: "error",
+          message,
+        },
+      }))
+      toast({
+        title: "验证失败",
+        description: message,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleCouponInput = (planId: string, value: string) => {
+    setCouponStates((prev) => ({
+      ...prev,
+      [planId]: {
+        code: value,
+        status: "idle",
+      },
+    }))
+  }
+
+  const handleCouponClear = (planId: string) => {
+    setCouponStates((prev) => ({
+      ...prev,
+      [planId]: {
+        code: "",
+        status: "idle",
+      },
+    }))
   }
 
   const formatDataVolume = (bytes: number) => {
@@ -177,18 +297,20 @@ export default function SubscribePage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan, index) => {
             const Icon = getPlanIcon(index)
-            const selectedKey =
-              selectedPeriods[plan.id] ?? plan.available_periods?.[0]?.legacyKey ?? plan.purchase_period
+            const selectedKey = resolveSelectedPeriodKey(plan)
             const selectedPeriod = plan.available_periods?.find((item) => item.legacyKey === selectedKey)
             const periodLabel = selectedPeriod?.label ?? plan.duration_label ?? `${plan.duration_days} 天`
             const periodDays = selectedPeriod?.days ?? plan.duration_days
             const periodPrice = selectedPeriod?.price ?? plan.price
+            const couponState = couponStates[plan.id]
+            const appliedCoupon = getAppliedCoupon(plan.id)
+            const { discount, finalPrice } = calculateDiscount(periodPrice, appliedCoupon)
 
             return (
               <Card key={plan.id} className={`flex flex-col ${plan.popular ? "border-primary shadow-lg shadow-primary/20" : ""}`}>
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                <CardHeader className="gap-4">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
                         <Icon className="h-4 w-4 text-primary" />
                       </div>
@@ -197,58 +319,136 @@ export default function SubscribePage() {
                         <p className="text-sm text-muted-foreground">{periodLabel}</p>
                       </div>
                     </div>
-                    {plan.popular && <Badge variant="default">热门</Badge>}
+                    <div className="text-left md:text-right">
+                      <div className="text-4xl font-bold text-foreground">¥{finalPrice.toFixed(2)}</div>
+                      {discount > 0 && (
+                        <div className="text-sm text-muted-foreground line-through">¥{periodPrice.toFixed(2)}</div>
+                      )}
+                      <p className="text-xs text-muted-foreground">{periodDays > 0 ? `${periodDays} 天` : "一次性套餐"}</p>
+                      {discount > 0 && <p className="text-xs text-emerald-600">已优惠 ¥{discount.toFixed(2)}</p>}
+                    </div>
                   </div>
+                  {plan.popular && <Badge variant="default" className="w-fit">热门</Badge>}
                 </CardHeader>
-                <CardContent className="flex flex-1 flex-col gap-5">
-                  <div>
-                    <div className="text-4xl font-bold text-foreground">¥{periodPrice.toFixed(2)}</div>
-                    <p className="text-sm text-muted-foreground">{periodDays > 0 ? `${periodDays} 天` : "一次性套餐"}</p>
+                <CardContent className="flex flex-1 flex-col gap-4">
+                  <div className="space-y-3 rounded-xl border border-dashed px-4 py-3">
+                    {plan.available_periods && plan.available_periods.length > 0 && (
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">计费周期</Label>
+                        <Select
+                          value={selectedKey ?? undefined}
+                          onValueChange={(value) => {
+                            setSelectedPeriods((prev) => ({
+                              ...prev,
+                              [plan.id]: value,
+                            }))
+                            setCouponStates((prev) => {
+                              const current = prev[plan.id]
+                              if (!current) return prev
+                              return {
+                                ...prev,
+                                [plan.id]: {
+                                  ...current,
+                                  status: "idle",
+                                  data: undefined,
+                                  message: undefined,
+                                },
+                              }
+                            })
+                          }}
+                        >
+                          <SelectTrigger className="h-9 text-left">
+                            <SelectValue placeholder="选择计费周期" />
+                          </SelectTrigger>
+                          <SelectContent align="start">
+                            {plan.available_periods.map((period) => (
+                              <SelectItem key={period.legacyKey} value={period.legacyKey}>
+                                {period.label} · ¥{period.price.toFixed(2)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">折扣码</Label>
+                      <div className="flex w-full items-center gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            value={couponState?.code ?? ""}
+                            onChange={(event) => handleCouponInput(plan.id, event.target.value)}
+                            placeholder="输入折扣码"
+                            className="h-9 pr-9"
+                          />
+                          {(couponState?.code || couponState?.status === "valid") && (
+                            <button
+                              type="button"
+                              aria-label="清除折扣码"
+                              className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
+                              onClick={() => handleCouponClear(plan.id)}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-9 px-4"
+                          onClick={() => handleCouponValidate(plan)}
+                          disabled={couponState?.status === "loading"}
+                        >
+                          {couponState?.status === "loading" ? "验证中" : "验证"}
+                        </Button>
+                      </div>
+                      {couponState?.status === "valid" && couponState.data && (
+                        <p className="text-xs text-emerald-600">
+                          已应用 {couponState.data.name || couponState.data.code}，立减 ¥{discount.toFixed(2)}
+                        </p>
+                      )}
+                      {couponState?.status === "error" && couponState.message && (
+                        <p className="text-xs text-destructive">{couponState.message}</p>
+                      )}
+                    </div>
                   </div>
 
-                  {plan.available_periods && plan.available_periods.length > 0 && (
-                    <div className="space-y-2 rounded-lg border border-dashed px-3 py-3">
-                      <Label className="text-xs text-muted-foreground">选择计费周期</Label>
-                      <Select
-                        value={selectedKey}
-                        onValueChange={(value) =>
-                          setSelectedPeriods((prev) => ({
-                            ...prev,
-                            [plan.id]: value,
-                          }))
-                        }
-                      >
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder="选择计费周期" />
-                        </SelectTrigger>
-                        <SelectContent align="start">
-                          {plan.available_periods.map((period) => (
-                            <SelectItem key={period.legacyKey} value={period.legacyKey}>
-                              {period.label} · ¥{period.price.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  <div className="rounded-lg bg-muted/30 p-3 text-sm">
+                    <div className="space-y-2 md:hidden">
+                      <div className="flex items-center justify-between text-muted-foreground">
+                        <span>流量额度</span>
+                        <span className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-muted-foreground">
+                        <span>速率限制</span>
+                        <span className="font-semibold text-foreground">
+                          {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-muted-foreground">
+                        <span>设备数量</span>
+                        <span className="font-semibold text-foreground">
+                          {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
+                        </span>
+                      </div>
                     </div>
-                  )}
-
-                  <div className="grid gap-3 rounded-lg bg-muted/30 p-3 text-sm">
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>流量额度</span>
-                      <span className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>速率限制</span>
-                      <span className="font-semibold text-foreground">
-                        {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>设备数量</span>
-                      <span className="font-semibold text-foreground">
-                        {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
-                      </span>
-                    </div>
+                    <dl className="hidden gap-3 md:grid md:grid-cols-3">
+                      <div className="space-y-1">
+                        <dt className="text-muted-foreground">流量额度</dt>
+                        <dd className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-muted-foreground">速率限制</dt>
+                        <dd className="font-semibold text-foreground">
+                          {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
+                        </dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-muted-foreground">设备数量</dt>
+                        <dd className="font-semibold text-foreground">
+                          {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
 
                   {plan.features && plan.features.length > 0 && (
