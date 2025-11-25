@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { RegisterForm } from "@/components/auth/register-form"
 import Link from "next/link"
 
@@ -16,7 +17,9 @@ export default function RegisterPage() {
           <p className="text-sm text-white/70">创建账户，解锁极速网络与高级节点</p>
         </div>
 
-        <RegisterForm />
+        <Suspense fallback={<div className="w-full max-w-md mx-auto text-center text-white/80">正在加载...</div>}>
+          <RegisterForm />
+        </Suspense>
 
         <p className="text-center text-sm text-muted-foreground">
           已有账户？{" "}

@@ -122,13 +122,22 @@ export default function InvitePage() {
     }
   }
 
-  const handleCopyCode = (code: string) => {
+  const handleCopyCode = async (code: string) => {
     const inviteUrl = `${window.location.origin}/register?code=${code}`
-    navigator.clipboard.writeText(inviteUrl)
-    toast({
-      title: "复制成功",
-      description: "邀请链接已复制到剪贴板",
-    })
+    try {
+      await navigator.clipboard.writeText(inviteUrl)
+      toast({
+        title: "复制成功",
+        description: "邀请链接已复制到剪贴板",
+      })
+    } catch (error) {
+      console.error("[v0] Failed to copy invite link:", error)
+      toast({
+        title: "复制失败",
+        description: "请检查浏览器权限后重试",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleTransfer = async () => {
@@ -440,6 +449,7 @@ export default function InvitePage() {
                   <TableRow>
                     <TableHead>邀请码</TableHead>
                     <TableHead>创建时间</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -447,6 +457,17 @@ export default function InvitePage() {
                     <TableRow key={invite.id}>
                       <TableCell className="font-mono font-medium">{invite.code}</TableCell>
                       <TableCell>{new Date(invite.created_at).toLocaleDateString("zh-CN")}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="inline-flex items-center gap-2"
+                          onClick={() => handleCopyCode(invite.code)}
+                        >
+                          <Copy className="h-4 w-4" />
+                          复制链接
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

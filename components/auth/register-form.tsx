@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -27,11 +27,13 @@ export function RegisterForm() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [inviteCode, setInviteCode] = useState("")
+  const [lockedInviteCode, setLockedInviteCode] = useState<string | null>(null)
   const [emailCode, setEmailCode] = useState("")
   const [loading, setLoading] = useState(false)
   const [sendingCode, setSendingCode] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const { config, loading: configLoading, error: configError } = useGuestConfig()
   const { remaining: codeCountdown, start: startCountdown, reset: resetCountdown } = useCountdown(60)
@@ -49,10 +51,23 @@ export function RegisterForm() {
     }
   }, [whitelist])
 
+  useEffect(() => {
+    const codeFromLink = searchParams?.get("code") || searchParams?.get("invite_code")
+    if (codeFromLink) {
+      const trimmed = codeFromLink.trim()
+      if (trimmed) {
+        setInviteCode(trimmed)
+        setLockedInviteCode(trimmed)
+      }
+    }
+  }, [searchParams])
+
   const requiresEmailCode = config?.is_email_verify === 1
   const inviteRequired = config?.is_invite_force === 1
   const shouldResetCaptcha = Boolean(captcha.captchaRequired && config?.captcha_type !== "recaptcha-v3")
   const hasWhitelist = whitelist.length > 0
+  const inviteCodeLocked = Boolean(lockedInviteCode)
+  const effectiveInviteCode = (lockedInviteCode ?? inviteCode).trim()
 
   const raiseInlineError = (title: string, description?: string) => {
     setFormError(description ?? title)
@@ -162,7 +177,7 @@ export function RegisterForm() {
       return
     }
 
-    if (inviteRequired && !inviteCode.trim()) {
+    if (inviteRequired && !effectiveInviteCode) {
       raiseInlineError("需要邀请码", "请填写受邀的邀请码")
       return
     }
@@ -173,7 +188,7 @@ export function RegisterForm() {
       const response = await api.register({
         email: emailValue.toLowerCase(),
         password,
-        invite_code: inviteCode.trim() || undefined,
+        invite_code: effectiveInviteCode || undefined,
         email_code: requiresEmailCode ? emailCode.trim() : undefined,
         ...captchaPayload,
       })
@@ -283,10 +298,17 @@ export function RegisterForm() {
               id="inviteCode"
               type="text"
               placeholder="邀请码"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value)}
+              value={inviteCodeLocked ? lockedInviteCode ?? "" : inviteCode}
+              onChange={(e) => {
+                if (inviteCodeLocked) return
+                setInviteCode(e.target.value)
+              }}
+              readOnly={inviteCodeLocked}
               required={inviteRequired}
             />
+            {inviteCodeLocked && (
+              <p className="text-xs text-muted-foreground">已通过邀请链接自动填入，无法修改</p>
+            )}
           </div>
 
           {requiresEmailCode && (
