@@ -194,22 +194,31 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
         <Skeleton className="h-4 w-24" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <Skeleton className="h-4 w-24" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-6 w-28" />
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-4 w-64" />
       </div>
 
       <Card>
-        <CardContent className="pt-6">
-          <Skeleton className="h-80 w-full" />
+        <CardHeader className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <Skeleton className="h-4 w-32" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="rounded-lg border px-3 py-2">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -232,7 +241,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
           <div>
             <h1 className="text-3xl font-bold text-foreground">延迟详情</h1>
             <p className="text-muted-foreground">
-              查看节点 {node?.name ?? uuid} 的 Ping 延迟曲线。
+              查看节点 {node?.name ?? uuid} 的实时延迟与丢包概览。
             </p>
           </div>
         </div>
