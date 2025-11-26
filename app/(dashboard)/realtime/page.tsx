@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Activity, AlertTriangle, Wifi } from "lucide-react"
 
@@ -8,14 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-
-const DEFAULT_BASE_URL = "https://komari.xiercloud.uk"
-const DEFAULT_WS_URL = "wss://komari.xiercloud.uk/api/clients"
-const DEFAULT_API_KEY = "komari-nRVg6wXYN5SbwK1Q02LsW2jh8SaFIqJD"
-
-const KOMARI_API_BASE = process.env.NEXT_PUBLIC_KOMARI_BASE_URL ?? DEFAULT_BASE_URL
-const KOMARI_WS_URL = process.env.NEXT_PUBLIC_KOMARI_WS_URL ?? DEFAULT_WS_URL
-const KOMARI_API_KEY = process.env.NEXT_PUBLIC_KOMARI_API_KEY ?? DEFAULT_API_KEY
+import { KOMARI_API_BASE, buildKomariHeaders, buildKomariWsUrl } from "@/lib/komari"
 
 type NodeMeta = {
   uuid: string
@@ -47,18 +41,6 @@ const formatSpeed = (bytesPerSecond: number) => {
   return `${formatted} ${units[index]}`
 }
 
-const buildWsUrl = () => {
-  try {
-    const url = new URL(KOMARI_WS_URL)
-    if (KOMARI_API_KEY) {
-      url.searchParams.set("api_key", KOMARI_API_KEY)
-    }
-    return url.toString()
-  } catch {
-    return KOMARI_WS_URL
-  }
-}
-
 export default function RealtimeTrafficPage() {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionState>("connecting")
   const [traffic, setTraffic] = useState<NodeRealtime[]>([])
@@ -78,15 +60,8 @@ export default function RealtimeTrafficPage() {
 
     const fetchNodeMeta = async () => {
       try {
-        const headers: HeadersInit = {
-          Accept: "application/json",
-        }
-        if (KOMARI_API_KEY) {
-          headers["Authorization"] = `Bearer ${KOMARI_API_KEY}`
-        }
-
         const response = await fetch(`${KOMARI_API_BASE}/api/nodes`, {
-          headers,
+          headers: buildKomariHeaders(),
           cache: "no-store",
           signal: controller.signal,
         })
@@ -199,7 +174,7 @@ export default function RealtimeTrafficPage() {
       setErrorMessage(null)
 
       try {
-        const socket = new WebSocket(buildWsUrl())
+        const socket = new WebSocket(buildKomariWsUrl())
         socketRef.current = socket
 
         socket.onopen = () => {
@@ -311,22 +286,24 @@ export default function RealtimeTrafficPage() {
         {filteredTraffic.map((node) => {
           const meta = nodeMeta[node.uuid]
           return (
-            <Card key={node.uuid} className="border-border/80">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-lg text-foreground">{meta?.name ?? node.uuid}</CardTitle>
-                <Badge variant={node.isOnline ? "default" : "secondary"}>{node.isOnline ? "在线" : "离线"}</Badge>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">实时上行</span>
-                  <span className="font-semibold text-foreground">{formatSpeed(node.network.up)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">实时下行</span>
-                  <span className="font-semibold text-foreground">{formatSpeed(node.network.down)}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={node.uuid} href={`/realtime/${node.uuid}`} className="block">
+              <Card className="border-border/80 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-lg text-foreground">{meta?.name ?? node.uuid}</CardTitle>
+                  <Badge variant={node.isOnline ? "default" : "secondary"}>{node.isOnline ? "在线" : "离线"}</Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">实时上行</span>
+                    <span className="font-semibold text-foreground">{formatSpeed(node.network.up)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">实时下行</span>
+                    <span className="font-semibold text-foreground">{formatSpeed(node.network.down)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           )
         })}
       </div>
