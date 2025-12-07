@@ -364,7 +364,7 @@ export default function RealtimeTrafficPage() {
       return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <Card key={index} className="border-none shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-6 w-1/2" />
                 <Skeleton className="mt-2 h-4 w-1/3" />
@@ -383,7 +383,7 @@ export default function RealtimeTrafficPage() {
     if (displayTraffic.length === 0) {
       return (
         <motion.div variants={item}>
-          <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <Card className="border-none shadow-lg bg-card">
             <CardContent className="flex min-h-[240px] flex-col items-center justify-center gap-3 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted/50">
                 <Activity className="h-7 w-7 text-muted-foreground opacity-50" />
@@ -411,8 +411,11 @@ export default function RealtimeTrafficPage() {
               transition={{ delay: index * 0.05 }}
             >
               <Link href={`/realtime/${node.uuid}`} className="block h-full">
-                <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-xl group">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Card className="h-full border-none shadow-lg bg-card transition-all hover:-translate-y-1 hover:shadow-xl group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                    <Server className="w-24 h-24" />
+                  </div>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                     <div className="space-y-1">
                       <CardTitle className="text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1" title={node.displayName}>
                         {node.displayName}
@@ -427,20 +430,22 @@ export default function RealtimeTrafficPage() {
                       {node.isOnline ? "在线" : "离线"}
                     </Badge>
                   </CardHeader>
-                  <CardContent className="space-y-4 pt-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border/50">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <ArrowUp className="h-4 w-4 text-orange-500" />
-                        <span>实时上行</span>
+                  <CardContent className="space-y-4 pt-4 relative z-10">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1 p-3 rounded-lg bg-background/50 border border-border/50">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <ArrowUp className="h-3 w-3 text-orange-500" />
+                          <span>实时上行</span>
+                        </div>
+                        <div className="font-mono font-semibold text-foreground text-sm">{formatSpeed(node.network.up)}</div>
                       </div>
-                      <span className="font-mono font-semibold text-foreground">{formatSpeed(node.network.up)}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border/50">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <ArrowDown className="h-4 w-4 text-green-500" />
-                        <span>实时下行</span>
+                      <div className="space-y-1 p-3 rounded-lg bg-background/50 border border-border/50">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <ArrowDown className="h-3 w-3 text-green-500" />
+                          <span>实时下行</span>
+                        </div>
+                        <div className="font-mono font-semibold text-foreground text-sm">{formatSpeed(node.network.down)}</div>
                       </div>
-                      <span className="font-mono font-semibold text-foreground">{formatSpeed(node.network.down)}</span>
                     </div>
                   </CardContent>
                 </Card>

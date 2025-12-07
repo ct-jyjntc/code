@@ -168,7 +168,7 @@ export default function SubscriptionPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <motion.div variants={item} className="lg:col-span-2">
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+          <Card className="h-full border-none shadow-lg bg-card relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <ShieldCheck className="w-32 h-32" />
             </div>
@@ -206,7 +206,7 @@ export default function SubscriptionPage() {
         </motion.div>
 
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+          <Card className="h-full border-none shadow-lg bg-card relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <Gauge className="w-32 h-32" />
             </div>
@@ -252,7 +252,7 @@ export default function SubscriptionPage() {
       </div>
 
       <motion.div variants={item}>
-        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+        <Card className="border-none shadow-lg bg-card relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
             <Download className="w-32 h-32" />
           </div>
@@ -295,7 +295,7 @@ export default function SubscriptionPage() {
       </motion.div>
 
       <motion.div variants={item}>
-        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+        <Card className="border-none shadow-lg bg-card">
           <CardHeader>
             <CardTitle>订阅连接</CardTitle>
             <CardDescription>
@@ -304,7 +304,6 @@ export default function SubscriptionPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent pointer-events-none" />
               <Textarea
                 readOnly
                 value={subscription?.subscribe_url || ""}

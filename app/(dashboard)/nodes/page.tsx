@@ -95,7 +95,7 @@ export default function NodesPage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="h-[180px] rounded-xl border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <Card key={i} className="h-[180px] rounded-xl border-none shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-6 w-32" />
                 <Skeleton className="mt-2 h-4 w-24" />
@@ -143,7 +143,7 @@ export default function NodesPage() {
             transition={{ delay: index * 0.05 }}
           >
           <Card 
-            className="h-full overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 group relative"
+            className="h-full overflow-hidden border-none shadow-lg bg-card transition-all hover:shadow-xl hover:-translate-y-1 group relative"
           >
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <Globe className="w-24 h-24" />

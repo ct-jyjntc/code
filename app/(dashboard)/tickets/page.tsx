@@ -223,7 +223,7 @@ export default function TicketsPage() {
 
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <Card key={i} className="border-none shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-6 w-48" />
               </CardHeader>
@@ -366,7 +366,7 @@ export default function TicketsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <Card className="border-none shadow-lg bg-card">
             <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
                 <MessageSquare className="h-8 w-8 text-muted-foreground opacity-50" />
@@ -392,7 +392,7 @@ export default function TicketsPage() {
               transition={{ duration: 0.3 }}
             >
               <Card
-                className="cursor-pointer transition-all hover:bg-card/80 border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl hover:-translate-y-0.5"
+                className="cursor-pointer transition-all hover:bg-card/80 border-none shadow-lg bg-card hover:shadow-xl hover:-translate-y-0.5"
                 onClick={() => router.push(`/tickets/${ticket.id}`)}
               >
                 <CardHeader>

@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Server, Activity, CreditCard, Sparkles, BookOpen, ArrowRight, Zap, LifeBuoy, Rocket } from "lucide-react"
+import { Server, Activity, CreditCard, Sparkles, BookOpen, ArrowRight, Zap, LifeBuoy, Rocket, Crown, Book, MessageSquare, ShieldCheck } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
@@ -122,32 +122,28 @@ export default function DashboardPage() {
     {
       label: "购买订阅",
       description: "快速续费或选购新套餐",
-      icon: CreditCard,
-      iconBg: "bg-primary/10",
+      icon: Crown,
       iconColor: "text-primary",
       href: "/subscribe",
     },
     {
       label: "使用文档",
       description: "查看配置指南与常见问题",
-      icon: BookOpen,
-      iconBg: "bg-blue-500/10",
+      icon: Book,
       iconColor: "text-blue-500",
       href: "/knowledge",
     },
     {
       label: "创建工单",
       description: "联系支持团队解决问题",
-      icon: LifeBuoy,
-      iconBg: "bg-orange-500/10",
+      icon: MessageSquare,
       iconColor: "text-orange-500",
       href: "/tickets",
     },
     {
       label: "一键订阅",
       description: "根据当前使用量自动推荐套餐",
-      icon: Zap,
-      iconBg: "bg-green-500/10",
+      icon: ShieldCheck,
       iconColor: "text-green-500",
       href: "/subscription",
     },
@@ -218,7 +214,7 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="lg:col-span-5 flex flex-col"
           >
-            <Card className="flex-1 overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <Card className="flex-1 overflow-hidden border-none shadow-lg bg-card">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg font-medium">站点公告</CardTitle>
@@ -300,7 +296,7 @@ export default function DashboardPage() {
             className="lg:col-span-7"
           >
             <Card 
-              className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm overflow-hidden group cursor-pointer transition-all hover:shadow-xl"
+              className="h-full border-none shadow-lg bg-card overflow-hidden group cursor-pointer transition-all hover:shadow-xl"
               onClick={() => router.push("/subscription")}
             >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -355,19 +351,20 @@ export default function DashboardPage() {
                   whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(action.href)}
-                  className="relative flex flex-col gap-4 p-6 rounded-xl border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-shadow duration-300 text-left group overflow-hidden"
+                  className="relative flex flex-col justify-between p-6 rounded-xl border-none shadow-lg bg-card hover:shadow-xl transition-shadow duration-300 text-left group overflow-hidden h-32"
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                    <ArrowRight className="h-5 w-5 text-muted-foreground/50" />
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                    <action.icon className="w-24 h-24" />
                   </div>
                   
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${action.iconBg} group-hover:scale-110 transition-transform duration-300`}>
-                    <action.icon className={`h-6 w-6 ${action.iconColor}`} />
+                  <div className="relative z-10 flex items-center gap-2">
+                    <action.icon className={`h-5 w-5 ${action.iconColor}`} />
+                    <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{action.label}</span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{action.label}</p>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{action.description}</p>
-                  </div>
+                  
+                  <p className="relative z-10 text-xs text-muted-foreground line-clamp-2">
+                    {action.description}
+                  </p>
                 </motion.button>
               ))}
             </div>
@@ -378,7 +375,7 @@ export default function DashboardPage() {
       <Dialog open={detailIndex !== null} onOpenChange={(open) => !open && setDetailIndex(null)}>
         <DialogContent className="max-w-3xl max-h-[min(90vh,800px)] overflow-y-auto border-none shadow-2xl bg-card/95 backdrop-blur-xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               {detailIndex !== null && activeAnnouncements[detailIndex] ? activeAnnouncements[detailIndex].title : ""}
             </DialogTitle>
             <DialogDescription>站点公告详情</DialogDescription>

@@ -179,7 +179,7 @@ type EmailCodePayload = {
   email: string
 } & CaptchaPayload
 
-async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+async function fetchWithAuth(endpoint: string, options: RequestInit = {}, retries = 2): Promise<any> {
   if (USE_MOCK_DATA) {
     await new Promise((resolve) => setTimeout(resolve, 200))
     throw new Error("Mock mode active")
@@ -195,36 +195,54 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     headers["Authorization"] = formatAuthHeader(token)
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-    body: safeJsonStringify(options.body),
-    cache: "no-store",
-  })
-
-  let payload: any = null
   try {
-    payload = await response.json()
-  } catch {
-    // ignore JSON parse errors
-  }
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      body: safeJsonStringify(options.body),
+      cache: "no-store",
+    })
 
-  if (!response.ok) {
-    const message = payload?.message || response.statusText || "Request failed"
-    throw new ApiError(response.status, message)
-  }
-
-  if (payload && typeof payload === "object" && "status" in payload) {
-    if (payload.status !== "success") {
-      throw new ApiError(response.status, payload?.message || "Request failed")
+    // Retry on 502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout
+    if ((response.status === 502 || response.status === 503 || response.status === 504) && retries > 0) {
+      console.warn(`[API] ${response.status} on ${endpoint}, retrying... (${retries} attempts left)`)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      return fetchWithAuth(endpoint, options, retries - 1)
     }
-    if ("data" in payload) {
-      const data = (payload as Record<string, unknown>).data
-      return data ?? payload
-    }
-  }
 
-  return payload
+    let payload: any = null
+    try {
+      payload = await response.json()
+    } catch {
+      // ignore JSON parse errors
+    }
+
+    if (!response.ok) {
+      const message = payload?.message || response.statusText || "Request failed"
+      throw new ApiError(response.status, message)
+    }
+
+    if (payload && typeof payload === "object" && "status" in payload) {
+      if (payload.status !== "success") {
+        throw new ApiError(response.status, payload?.message || "Request failed")
+      }
+      if ("data" in payload) {
+        const data = (payload as Record<string, unknown>).data
+        return data ?? payload
+      }
+    }
+
+    return payload
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    // Network errors (fetch failed)
+    if (retries > 0) {
+       console.warn(`[API] Network error on ${endpoint}, retrying... (${retries} attempts left)`, error)
+       await new Promise((resolve) => setTimeout(resolve, 1000))
+       return fetchWithAuth(endpoint, options, retries - 1)
+    }
+    throw error
+  }
 }
 
 const selectPlanPeriods = (plan: any) => {
@@ -624,9 +642,18 @@ export const api = {
   getDashboardStats: async () => {
     if (USE_MOCK_DATA) return mockDashboardStats
     const [subscription, userInfo, stat] = await Promise.all([
-      fetchWithAuth("/user/getSubscribe"),
-      fetchWithAuth("/user/info"),
-      fetchWithAuth("/user/getStat").catch(() => []),
+      fetchWithAuth("/user/getSubscribe").catch((e) => {
+        console.warn("[Dashboard] Failed to fetch subscription:", e)
+        return null
+      }),
+      fetchWithAuth("/user/info").catch((e) => {
+        console.warn("[Dashboard] Failed to fetch user info:", e)
+        return null
+      }),
+      fetchWithAuth("/user/getStat").catch((e) => {
+        console.warn("[Dashboard] Failed to fetch stats:", e)
+        return []
+      }),
     ])
 
     const total = bytesFromValue(subscription?.transfer_enable)

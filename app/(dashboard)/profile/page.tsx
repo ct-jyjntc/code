@@ -180,10 +180,7 @@ export default function ProfilePage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <motion.div variants={item} className="lg:col-span-1">
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-              <User className="w-32 h-32" />
-            </div>
+          <Card className="h-full border-none shadow-lg bg-card relative overflow-hidden group">
             <CardHeader className="relative z-10">
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
@@ -229,7 +226,7 @@ export default function ProfilePage() {
 
         <div className="space-y-6 lg:col-span-2">
           <motion.div variants={item}>
-            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <Card className="border-none shadow-lg bg-card relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                 <User className="w-32 h-32" />
               </div>
@@ -259,7 +256,7 @@ export default function ProfilePage() {
           </motion.div>
 
           <motion.div variants={item}>
-            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <Card className="border-none shadow-lg bg-card relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                 <Lock className="w-32 h-32" />
               </div>

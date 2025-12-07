@@ -293,7 +293,7 @@ export default function TicketDetailPage() {
 
           {ticket.status !== "closed" && (
             <motion.div variants={item}>
-              <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+              <Card className="border-none shadow-lg bg-card">
                 <CardHeader>
                   <CardTitle className="text-lg">回复工单</CardTitle>
                 </CardHeader>
@@ -389,7 +389,7 @@ export default function TicketDetailPage() {
         </div>
 
         <motion.div variants={item} className="space-y-6">
-          <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <Card className="border-none shadow-lg bg-card">
             <CardHeader>
               <CardTitle className="text-base">工单信息</CardTitle>
             </CardHeader>

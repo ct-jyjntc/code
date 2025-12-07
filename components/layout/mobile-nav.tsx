@@ -73,7 +73,7 @@ export function MobileNav() {
             <div className="flex h-full flex-col">
               <div className="flex h-16 items-center justify-between border-b border-border/50 px-6">
                 <div className="flex flex-col leading-tight">
-                  <span className="text-xl font-bold text-foreground tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                  <span className="text-xl font-bold text-foreground tracking-tight">
                     Seele Cloud
                   </span>
                   <span className="text-[10px] uppercase text-muted-foreground tracking-[0.2em] font-medium">

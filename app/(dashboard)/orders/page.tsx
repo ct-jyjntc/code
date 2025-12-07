@@ -330,7 +330,7 @@ export default function OrdersPage() {
                 transition={{ duration: 0.3 }}
               >
                 <Card 
-                  className="h-full overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all cursor-pointer group"
+                  className="h-full overflow-hidden border-none shadow-lg bg-card hover:shadow-xl transition-all cursor-pointer group"
                   onClick={() => openOrderDialog(order.trade_no || "")}
                 >
                   <CardHeader className="pb-3">
@@ -492,7 +492,7 @@ export default function OrdersPage() {
                   <Button 
                     onClick={handleCheckout} 
                     disabled={paying || !selectedPaymentMethod} 
-                    className="w-full sm:w-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                    className="w-full sm:w-auto bg-primary hover:bg-primary/90"
                   >
                     {paying ? "处理中..." : "立即支付"}
                   </Button>

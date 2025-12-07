@@ -215,7 +215,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
         <Skeleton className="h-4 w-64" />
       </div>
 
-      <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+      <Card className="border-none shadow-lg bg-card">
         <CardHeader className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
             <Skeleton className="h-5 w-24" />
@@ -310,7 +310,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+        <Card className="border-none shadow-lg bg-card">
           <CardHeader className="flex flex-wrap items-center justify-between gap-4">
             <CardTitle className="flex items-center gap-2">
               <Info className="h-5 w-5 text-primary" />

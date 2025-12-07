@@ -69,7 +69,7 @@ export default function KnowledgePage() {
         setFilteredGroups(safeData)
       } catch (err) {
         console.error("[Knowledge] Failed to fetch knowledge base:", err)
-        setError("无法加载知识库内容，请稍后重试。")
+        setError("无法加载文档内容，请稍后重试。")
       } finally {
         setLoading(false)
       }
@@ -123,7 +123,7 @@ export default function KnowledgePage() {
       animate="show"
     >
       <motion.div variants={item} className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">知识库</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">实用文档</h1>
         <p className="text-muted-foreground">查阅常见问题解答和使用教程。</p>
       </motion.div>
 
@@ -157,7 +157,7 @@ export default function KnowledgePage() {
               </div>
               <p className="text-lg font-semibold">未找到相关文档</p>
               <p className="text-sm text-muted-foreground">
-                {keyword ? "换个关键词试试？" : "知识库暂时为空。"}
+                {keyword ? "换个关键词试试？" : "文档暂时为空。"}
               </p>
             </CardContent>
           </Card>
@@ -172,8 +172,8 @@ export default function KnowledgePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: groupIndex * 0.05 }}
           >
-            <Card className="h-full border-none shadow-md bg-card hover:shadow-lg transition-all flex flex-col relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+            <Card className="h-full border-none shadow-md bg-card hover:shadow-lg transition-all flex flex-col relative overflow-hidden group/card">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover/card:opacity-10 transition-opacity pointer-events-none">
                 <Book className="w-24 h-24" />
               </div>
               <CardHeader className="relative z-10">
@@ -188,17 +188,17 @@ export default function KnowledgePage() {
                     <button
                       key={article.id}
                       onClick={() => setSelectedArticle(article)}
-                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors group text-left"
+                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors group/item text-left"
                     >
                       <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors">
                           <FileText className="h-4 w-4" />
                         </div>
-                        <span className="text-sm font-medium truncate text-foreground/80 group-hover:text-foreground transition-colors">
+                        <span className="text-sm font-medium truncate text-foreground/80 group-hover/item:text-foreground transition-colors">
                           {article.title}
                         </span>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground/50 transition-colors" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover/item:text-foreground/50 transition-colors" />
                     </button>
                   ))}
                 </div>
@@ -209,11 +209,11 @@ export default function KnowledgePage() {
       </div>
 
       <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && setSelectedArticle(null)}>
-        <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 gap-0 border-none shadow-2xl bg-card/95 backdrop-blur-xl overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col p-0 gap-0 border-none shadow-2xl bg-card/95 backdrop-blur-xl overflow-hidden">
           <DialogHeader className="px-6 py-4 border-b border-border/50 shrink-0">
             <div className="flex items-center gap-2 text-muted-foreground mb-2 text-xs">
               <Book className="h-3 w-3" />
-              <span>知识库</span>
+              <span>实用文档</span>
               <span>/</span>
               <span>{groups.find(g => g.articles.some(a => a.id === selectedArticle?.id))?.category || "文档"}</span>
             </div>
@@ -238,12 +238,6 @@ export default function KnowledgePage() {
               </ReactMarkdown>
             </div>
             <div className="h-10" /> {/* Bottom spacer */}
-          </div>
-          
-          <div className="p-4 border-t border-border/50 bg-muted/20 flex justify-end shrink-0">
-            <Button variant="outline" onClick={() => setSelectedArticle(null)}>
-              关闭文档
-            </Button>
           </div>
         </DialogContent>
       </Dialog>

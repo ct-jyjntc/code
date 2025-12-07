@@ -104,7 +104,7 @@ export default function TrafficPage() {
 
         <div className="grid gap-4 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <Card key={i} className="border-none shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-4 w-20" />
               </CardHeader>
@@ -115,7 +115,7 @@ export default function TrafficPage() {
           ))}
         </div>
         
-        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+        <Card className="border-none shadow-lg bg-card">
           <CardHeader>
             <Skeleton className="h-6 w-32" />
           </CardHeader>
@@ -141,7 +141,7 @@ export default function TrafficPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
+          <Card className="h-full border-none shadow-lg bg-card transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <ArrowUp className="w-24 h-24" />
             </div>
@@ -155,7 +155,7 @@ export default function TrafficPage() {
           </Card>
         </motion.div>
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
+          <Card className="h-full border-none shadow-lg bg-card transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <ArrowDown className="w-24 h-24" />
             </div>
@@ -169,7 +169,7 @@ export default function TrafficPage() {
           </Card>
         </motion.div>
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
+          <Card className="h-full border-none shadow-lg bg-card transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
               <Activity className="w-24 h-24" />
             </div>
@@ -185,7 +185,7 @@ export default function TrafficPage() {
       </div>
 
       <motion.div variants={item}>
-        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+        <Card className="border-none shadow-lg bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />

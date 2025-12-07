@@ -283,7 +283,7 @@ export default function SubscribePage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <Card key={i} className="border-none shadow-lg bg-card">
               <CardHeader>
                 <Skeleton className="h-6 w-24" />
                 <Skeleton className="mt-2 h-4 w-32" />
@@ -329,7 +329,7 @@ export default function SubscribePage() {
           return (
             <Card 
               key={plan.id} 
-              className={`flex flex-col border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 ${
+              className={`flex flex-col border-none shadow-lg bg-card transition-all hover:shadow-xl hover:-translate-y-1 ${
                 plan.popular ? "ring-2 ring-primary/50 shadow-primary/10" : ""
               }`}
             >
@@ -504,7 +504,7 @@ export default function SubscribePage() {
 
       {plans.length === 0 && (
         <motion.div variants={item}>
-          <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <Card className="border-none shadow-lg bg-card">
             <CardContent className="flex min-h-[200px] items-center justify-center">
               <div className="text-center">
                 <p className="text-muted-foreground">暂无可用套餐</p>
