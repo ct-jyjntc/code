@@ -143,12 +143,14 @@ export default function NodesPage() {
             transition={{ delay: index * 0.05 }}
           >
           <Card 
-            className="h-full overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 group"
+            className="h-full overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 group relative"
           >
-            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <Globe className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 relative z-10">
               <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2 text-base font-medium">
-                  <Globe className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base font-medium">
                   {node.name}
                 </CardTitle>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -165,7 +167,7 @@ export default function NodesPage() {
               </div>
               {getStatusBadge(node.status)}
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Wifi className="h-3 w-3" />

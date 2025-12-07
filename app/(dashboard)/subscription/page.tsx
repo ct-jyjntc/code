@@ -168,15 +168,17 @@ export default function SubscriptionPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <motion.div variants={item} className="lg:col-span-2">
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-primary" />
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <ShieldCheck className="w-32 h-32" />
+            </div>
+            <CardHeader className="relative z-10">
+              <CardTitle>
                 套餐详情
               </CardTitle>
               <CardDescription>当前生效的订阅计划信息</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-6 sm:grid-cols-2">
+            <CardContent className="grid gap-6 sm:grid-cols-2 relative z-10">
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">当前套餐</p>
                 <p className="text-2xl font-bold text-primary">{subscription?.plan?.name || "未订阅"}</p>
@@ -204,15 +206,17 @@ export default function SubscriptionPage() {
         </motion.div>
 
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gauge className="h-5 w-5 text-primary" />
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <Gauge className="w-32 h-32" />
+            </div>
+            <CardHeader className="relative z-10">
+              <CardTitle>
                 使用限制
               </CardTitle>
               <CardDescription>当前套餐的限制参数</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -248,15 +252,17 @@ export default function SubscriptionPage() {
       </div>
 
       <motion.div variants={item}>
-        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Download className="h-5 w-5 text-primary" />
+        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+            <Download className="w-32 h-32" />
+          </div>
+          <CardHeader className="relative z-10">
+            <CardTitle>
               流量使用
             </CardTitle>
             <CardDescription>实时流量统计与剩余用量</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 relative z-10">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm font-medium">
                 <span>已用 {usage.percent}%</span>

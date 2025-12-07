@@ -180,8 +180,11 @@ export default function ProfilePage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <motion.div variants={item} className="lg:col-span-1">
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-            <CardHeader>
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <User className="w-32 h-32" />
+            </div>
+            <CardHeader className="relative z-10">
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl" />
@@ -197,7 +200,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50">
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -226,15 +229,17 @@ export default function ProfilePage() {
 
         <div className="space-y-6 lg:col-span-2">
           <motion.div variants={item}>
-            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
+            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                <User className="w-32 h-32" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle>
                   基本信息
                 </CardTitle>
                 <CardDescription>查看和管理您的个人信息</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 relative z-10">
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="username">用户名</Label>
@@ -254,15 +259,17 @@ export default function ProfilePage() {
           </motion.div>
 
           <motion.div variants={item}>
-            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5 text-primary" />
+            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                <Lock className="w-32 h-32" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle>
                   修改密码
                 </CardTitle>
                 <CardDescription>更新您的账户密码以保护账户安全</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 relative z-10">
                 {passwordError && (
                   <Alert variant="destructive">
                     <AlertDescription>{passwordError}</AlertDescription>

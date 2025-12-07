@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Server, Activity, CreditCard, Sparkles, BookOpen, ArrowRight, Zap } from "lucide-react"
+import { Server, Activity, CreditCard, Sparkles, BookOpen, ArrowRight, Zap, LifeBuoy, Rocket } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkGfm from "remark-gfm"
@@ -131,24 +131,24 @@ export default function DashboardPage() {
       label: "使用文档",
       description: "查看配置指南与常见问题",
       icon: BookOpen,
-      iconBg: "bg-accent/50",
-      iconColor: "text-accent-foreground",
+      iconBg: "bg-blue-500/10",
+      iconColor: "text-blue-500",
       href: "/knowledge",
     },
     {
       label: "创建工单",
       description: "联系支持团队解决问题",
-      icon: Activity,
-      iconBg: "bg-muted",
-      iconColor: "text-muted-foreground",
+      icon: LifeBuoy,
+      iconBg: "bg-orange-500/10",
+      iconColor: "text-orange-500",
       href: "/tickets",
     },
     {
       label: "一键订阅",
       description: "根据当前使用量自动推荐套餐",
-      icon: Sparkles,
-      iconBg: "bg-secondary",
-      iconColor: "text-secondary-foreground",
+      icon: Zap,
+      iconBg: "bg-green-500/10",
+      iconColor: "text-green-500",
       href: "/subscription",
     },
   ]
@@ -344,24 +344,18 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-12"
-          >
+          <div className="lg:col-span-12">
             <h3 className="text-lg font-semibold mb-4 px-1">快捷操作</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {quickActions.map((action, idx) => (
                 <motion.button
                   key={action.label}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25 + idx * 0.05 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
+                  animate={{ opacity: 1, y: 0, transition: { delay: 0.25 + idx * 0.05 } }}
+                  whileHover={{ scale: 1.02, y: -2, transition: { duration: 0.2 } }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(action.href)}
-                  className="relative flex flex-col gap-4 p-6 rounded-xl border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all text-left group overflow-hidden"
+                  className="relative flex flex-col gap-4 p-6 rounded-xl border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-shadow duration-300 text-left group overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                     <ArrowRight className="h-5 w-5 text-muted-foreground/50" />
@@ -377,7 +371,7 @@ export default function DashboardPage() {
                 </motion.button>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </motion.div>
 

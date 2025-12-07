@@ -290,12 +290,14 @@ export default function InvitePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <Users className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">总邀请</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="text-2xl font-bold">{stats.total_invites}</div>
               <p className="text-xs text-muted-foreground">已成功邀请人数</p>
             </CardContent>
@@ -307,12 +309,14 @@ export default function InvitePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <TrendingUp className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">活跃邀请</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="text-2xl font-bold">{stats.active_invites}</div>
               <p className="text-xs text-muted-foreground">仍在订阅中</p>
             </CardContent>
@@ -324,12 +328,14 @@ export default function InvitePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <Gift className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">佣金概览</CardTitle>
-              <Gift className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 relative z-10">
               <div>
                 <div className="text-2xl font-bold">¥{stats.available_commission.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">可用佣金</p>

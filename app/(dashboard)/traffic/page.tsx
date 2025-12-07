@@ -141,36 +141,42 @@ export default function TrafficPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <ArrowUp className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">总上传</CardTitle>
-              <ArrowUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="text-2xl font-bold text-primary">{formatBytes(stats.upload)}</div>
               <p className="text-xs text-muted-foreground">历史累计上传流量</p>
             </CardContent>
           </Card>
         </motion.div>
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <ArrowDown className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">总下载</CardTitle>
-              <ArrowDown className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="text-2xl font-bold text-primary">{formatBytes(stats.download)}</div>
               <p className="text-xs text-muted-foreground">历史累计下载流量</p>
             </CardContent>
           </Card>
         </motion.div>
         <motion.div variants={item}>
-          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-0.5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+              <Activity className="w-24 h-24" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">总流量</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               <div className="text-2xl font-bold text-primary">{formatBytes(stats.total)}</div>
               <p className="text-xs text-muted-foreground">历史累计总流量</p>
             </CardContent>

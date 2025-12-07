@@ -172,15 +172,17 @@ export default function KnowledgePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: groupIndex * 0.05 }}
           >
-            <Card className="h-full border-none shadow-md bg-card hover:shadow-lg transition-all flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Book className="h-5 w-5 text-primary" />
+            <Card className="h-full border-none shadow-md bg-card hover:shadow-lg transition-all flex flex-col relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                <Book className="w-24 h-24" />
+              </div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="text-lg">
                   {group.category || "未分类"}
                 </CardTitle>
                 <CardDescription>共 {group.articles?.length || 0} 篇文章</CardDescription>
               </CardHeader>
-              <CardContent className="flex-1">
+              <CardContent className="flex-1 relative z-10">
                 <div className="space-y-1">
                   {group.articles?.map((article) => (
                     <button
