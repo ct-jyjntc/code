@@ -246,15 +246,37 @@ export default function KnowledgePage() {
           </DialogHeader>
           
           <div className="mt-4">
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/10 prose-code:rounded prose-code:px-1 prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border/50">
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/10 prose-code:rounded-none prose-code:px-1 prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border/50 prose-pre:rounded-none">
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]} 
                 rehypePlugins={[rehypeRaw]}
                 components={{
-                  a: ({node, ...props}) => <a className="text-primary hover:underline decoration-dashed underline-offset-4" target="_blank" rel="noopener noreferrer" {...props} />,
-                  img: ({node, ...props}) => <img className="rounded-lg border border-border/50 shadow-sm my-4" {...props} />,
-                  table: ({node, ...props}) => <div className="overflow-x-auto my-4 rounded-lg border border-border/50"><table className="w-full" {...props} /></div>,
-                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary/50 bg-muted/30 pl-4 py-1 rounded-r-lg italic" {...props} />,
+                  h1: ({node, ...props}) => <h1 className="text-2xl font-bold border-b border-border/50 pb-2 mb-4 mt-6 first:mt-0" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-xl font-semibold border-b border-border/50 pb-2 mb-3 mt-5" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-lg font-medium mb-2 mt-4" {...props} />,
+                  p: ({node, ...props}) => <p className="leading-7 mb-4" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc list-outside ml-5 mb-4 space-y-1" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-5 mb-4 space-y-1" {...props} />,
+                  li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                  a: ({node, ...props}) => <a className="text-primary hover:underline decoration-dashed underline-offset-4 font-medium transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+                  img: ({node, ...props}) => <img className="rounded-none border border-border/50 shadow-sm my-4 max-w-full h-auto" {...props} />,
+                  table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-border/50"><table className="w-full text-sm text-left" {...props} /></div>,
+                  th: ({node, ...props}) => <th className="border-b border-border/50 bg-muted/50 p-2 font-medium" {...props} />,
+                  td: ({node, ...props}) => <td className="border-b border-border/50 p-2 last:border-0" {...props} />,
+                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary/50 bg-muted/30 pl-4 py-2 my-4 italic text-muted-foreground" {...props} />,
+                  code: ({node, inline, className, children, ...props}) => {
+                    const match = /language-(\w+)/.exec(className || '')
+                    return !inline ? (
+                      <code className={`block bg-muted/50 p-4 overflow-x-auto text-sm font-mono ${className}`} {...props}>
+                        {children}
+                      </code>
+                    ) : (
+                      <code className="bg-muted/50 px-1.5 py-0.5 text-sm font-mono text-primary" {...props}>
+                        {children}
+                      </code>
+                    )
+                  },
+                  pre: ({node, ...props}) => <pre className="bg-muted/50 border border-border/50 p-0 overflow-hidden my-4" {...props} />,
                 }}
               >
                 {selectedArticle?.body || selectedArticle?.content || "暂无内容"}

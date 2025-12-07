@@ -444,33 +444,49 @@ export default function DashboardPage() {
             <DialogDescription>站点公告详情</DialogDescription>
           </DialogHeader>
           {detailIndex !== null && activeAnnouncements[detailIndex] ? (
-            <div className="mt-4 prose prose-sm max-w-none text-muted-foreground dark:prose-invert prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground">
+            <div className="mt-4 prose prose-sm max-w-none text-muted-foreground dark:prose-invert prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/10 prose-code:rounded-none prose-code:px-1 prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border/50 prose-pre:rounded-none">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
+                  h1: ({node, ...props}) => <h1 className="text-2xl font-bold border-b border-border/50 pb-2 mb-4 mt-6 first:mt-0" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-xl font-semibold border-b border-border/50 pb-2 mb-3 mt-5" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-lg font-medium mb-2 mt-4" {...props} />,
+                  p: ({node, ...props}) => <p className="leading-7 mb-4" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc list-outside ml-5 mb-4 space-y-1" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal list-outside ml-5 mb-4 space-y-1" {...props} />,
+                  li: ({node, ...props}) => <li className="pl-1" {...props} />,
                   a: ({ node, ...props }) => (
                     <a {...props} className="text-primary underline decoration-dashed hover:decoration-solid font-medium transition-all" target="_blank" rel="noreferrer" />
                   ),
+                  img: ({node, ...props}) => <img className="rounded-none border border-border/50 shadow-sm my-4 max-w-full h-auto" {...props} />,
                   table: ({ node, ...props }) => (
-                    <div className="my-4 overflow-x-auto rounded-lg border border-border/50 shadow-sm">
-                      <table {...props} className="w-full text-sm" />
+                    <div className="my-4 overflow-x-auto border border-border/50 shadow-sm">
+                      <table {...props} className="w-full text-sm text-left" />
                     </div>
                   ),
-                  code: ({ node, inline, className, children, ...props }) => (
-                    <code
-                      {...props}
-                      className={`rounded bg-muted/50 px-1.5 py-0.5 text-xs font-semibold text-primary ${className ?? ""}`}
-                    >
-                      {children}
-                    </code>
-                  ),
+                  th: ({node, ...props}) => <th className="border-b border-border/50 bg-muted/50 p-2 font-medium" {...props} />,
+                  td: ({node, ...props}) => <td className="border-b border-border/50 p-2 last:border-0" {...props} />,
+                  code: ({ node, inline, className, children, ...props }) => {
+                    const match = /language-(\w+)/.exec(className || '')
+                    return !inline ? (
+                      <code className={`block bg-muted/50 p-4 overflow-x-auto text-sm font-mono ${className}`} {...props}>
+                        {children}
+                      </code>
+                    ) : (
+                      <code className="bg-muted/50 px-1.5 py-0.5 text-sm font-mono text-primary" {...props}>
+                        {children}
+                      </code>
+                    )
+                  },
+                  pre: ({node, ...props}) => <pre className="bg-muted/50 border border-border/50 p-0 overflow-hidden my-4" {...props} />,
                   details: ({ node, ...props }) => (
-                    <details {...props} className="rounded-lg border border-dashed border-border/50 bg-muted/20 px-4 py-2 text-sm" />
+                    <details {...props} className="border border-dashed border-border/50 bg-muted/20 px-4 py-2 text-sm" />
                   ),
                   summary: ({ node, ...props }) => (
                     <summary {...props} className="cursor-pointer text-sm font-semibold text-foreground hover:text-primary transition-colors" />
                   ),
+                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary/50 bg-muted/30 pl-4 py-2 my-4 italic text-muted-foreground" {...props} />,
                   hr: () => <hr className="my-6 border-dashed border-border" />,
                 }}
               >
