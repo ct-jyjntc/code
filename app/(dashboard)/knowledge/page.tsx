@@ -146,7 +146,7 @@ export default function KnowledgePage() {
       animate="show"
     >
       <motion.div variants={item} className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">实用文档</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">使用文档</h1>
         <p className="text-muted-foreground">查阅常见问题解答和使用教程。</p>
       </motion.div>
 
@@ -232,11 +232,11 @@ export default function KnowledgePage() {
       </div>
 
       <Dialog open={!!selectedArticle} onOpenChange={(open) => !open && setSelectedArticle(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col p-0 gap-0 border-none shadow-2xl bg-card/95 backdrop-blur-xl overflow-hidden">
-          <DialogHeader className="px-6 py-4 border-b border-border/50 shrink-0">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+          <DialogHeader>
             <div className="flex items-center gap-2 text-muted-foreground mb-2 text-xs">
               <Book className="h-3 w-3" />
-              <span>实用文档</span>
+              <span>使用文档</span>
               <span>/</span>
               <span>{groups.find(g => g.articles.some(a => a.id === selectedArticle?.id))?.category || "文档"}</span>
             </div>
@@ -245,7 +245,7 @@ export default function KnowledgePage() {
             </DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="mt-4">
             <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-primary prose-code:bg-primary/10 prose-code:rounded prose-code:px-1 prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border/50">
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]} 
@@ -260,7 +260,6 @@ export default function KnowledgePage() {
                 {selectedArticle?.body || selectedArticle?.content || "暂无内容"}
               </ReactMarkdown>
             </div>
-            <div className="h-10" /> {/* Bottom spacer */}
           </div>
         </DialogContent>
       </Dialog>
