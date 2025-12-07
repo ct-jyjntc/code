@@ -70,37 +70,65 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="space-y-2">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-5 w-48" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-1 h-[300px]">
+          <Card className="lg:col-span-1 h-full border-none shadow-lg bg-card">
             <CardHeader>
               <Skeleton className="h-24 w-24 rounded-full mx-auto" />
+              <div className="space-y-2 mt-4 text-center">
+                <Skeleton className="h-6 w-32 mx-auto" />
+                <Skeleton className="h-4 w-48 mx-auto" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <Skeleton className="h-6 w-32 mx-auto" />
+            <CardContent className="space-y-4 mt-4">
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-xl" />
             </CardContent>
           </Card>
 
           <div className="space-y-6 lg:col-span-2">
-            <Card className="h-[200px]">
+            <Card className="border-none shadow-lg bg-card">
               <CardHeader>
-                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-48 mt-1" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-32 w-full" />
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
-            <Card className="h-[300px]">
+            <Card className="border-none shadow-lg bg-card">
               <CardHeader>
-                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-48 mt-1" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-32 w-full" />
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-32 mt-4" />
               </CardContent>
             </Card>
           </div>

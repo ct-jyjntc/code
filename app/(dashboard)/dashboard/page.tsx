@@ -164,23 +164,86 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="space-y-2">
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-9 w-32" />
           <Skeleton className="h-5 w-64" />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-5 space-y-6">
-            <Skeleton className="h-[300px] w-full rounded-xl" />
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-stretch">
+          <div className="lg:col-span-5 flex flex-col">
+            <Card className="flex-1 border-none shadow-lg bg-card">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-32 mt-1" />
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4 pt-4 h-full">
+                <div className="space-y-3 flex-1">
+                  <Skeleton className="h-7 w-3/4" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2 pt-4 border-t border-border/50 mt-auto">
+                  <div className="flex gap-1">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                  </div>
+                  <Skeleton className="h-8 w-24 rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <div className="lg:col-span-7 space-y-6">
-            <Skeleton className="h-[300px] w-full rounded-xl" />
+
+          <div className="lg:col-span-7">
+            <Card className="h-full border-none shadow-lg bg-card">
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-48 mt-1" />
+              </CardHeader>
+              <CardContent className="space-y-8">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="p-4 rounded-xl bg-background/50 border border-border/50">
+                    <Skeleton className="h-3 w-16 mb-2" />
+                    <Skeleton className="h-8 w-32" />
+                  </div>
+                  <div className="p-4 rounded-xl bg-background/50 border border-border/50">
+                    <Skeleton className="h-3 w-16 mb-2" />
+                    <Skeleton className="h-8 w-32" />
+                  </div>
+                </div>
+
+                <div className="space-y-4 p-4 rounded-xl bg-background/50 border border-border/50">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <Skeleton className="h-3 w-full rounded-full" />
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
           <div className="lg:col-span-12">
+            <Skeleton className="h-7 w-24 mb-4" />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+                <div key={i} className="p-6 rounded-xl border-none shadow-lg bg-card h-32 flex flex-col justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+                  <Skeleton className="h-3 w-full" />
+                </div>
               ))}
             </div>
           </div>

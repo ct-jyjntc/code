@@ -280,14 +280,32 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="space-y-2">
-          <Skeleton className="h-10 w-32" />
-          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-9 w-32" />
+          <Skeleton className="h-5 w-48" />
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-xl" />
+            <Card key={i} className="h-full border-none shadow-lg bg-card">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <Skeleton className="h-6 w-32 mt-2" />
+                <Skeleton className="h-4 w-24 mt-2" />
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline justify-between">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-8 w-24" />
+                </div>
+              </CardContent>
+              <CardFooter className="pt-0">
+                <Skeleton className="h-9 w-full rounded-md" />
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </div>
