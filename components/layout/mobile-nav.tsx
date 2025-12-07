@@ -66,7 +66,7 @@ export function MobileNav() {
               <span className="sr-only">打开菜单</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0 border-r border-border/50 bg-background/80 backdrop-blur-2xl">
+          <SheetContent side="left" className="w-72 p-0 border-r border-border/50 bg-background">
             <SheetHeader className="sr-only">
               <SheetTitle>移动端导航菜单</SheetTitle>
             </SheetHeader>
