@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -59,6 +60,21 @@ interface CouponState {
   status: CouponStatus
   message?: string
   data?: CouponInfo
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 const calculateDiscount = (price: number, coupon?: CouponInfo) => {
@@ -261,13 +277,13 @@ export default function SubscribePage() {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">购买订阅</h1>
-          <p className="text-muted-foreground">选择适合您的套餐</p>
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-5 w-64" />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
+            <Card key={i} className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
               <CardHeader>
                 <Skeleton className="h-6 w-24" />
                 <Skeleton className="mt-2 h-4 w-32" />
@@ -287,206 +303,216 @@ export default function SubscribePage() {
   }
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-balance text-foreground">购买订阅</h1>
-          <p className="text-muted-foreground">选择适合您的套餐</p>
-        </div>
+    <motion.div 
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="space-y-2">
+        <h1 className="text-3xl font-bold text-balance text-foreground">购买订阅</h1>
+        <p className="text-muted-foreground">选择适合您的套餐</p>
+      </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan, index) => {
-            const Icon = getPlanIcon(index)
-            const selectedKey = resolveSelectedPeriodKey(plan)
-            const selectedPeriod = plan.available_periods?.find((item) => item.legacyKey === selectedKey)
-            const periodLabel = selectedPeriod?.label ?? plan.duration_label ?? `${plan.duration_days} 天`
-            const periodDays = selectedPeriod?.days ?? plan.duration_days
-            const periodPrice = selectedPeriod?.price ?? plan.price
-            const couponState = couponStates[plan.id]
-            const appliedCoupon = getAppliedCoupon(plan.id)
-            const { discount, finalPrice } = calculateDiscount(periodPrice, appliedCoupon)
+      <motion.div variants={item} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {plans.map((plan, index) => {
+          const Icon = getPlanIcon(index)
+          const selectedKey = resolveSelectedPeriodKey(plan)
+          const selectedPeriod = plan.available_periods?.find((item) => item.legacyKey === selectedKey)
+          const periodLabel = selectedPeriod?.label ?? plan.duration_label ?? `${plan.duration_days} 天`
+          const periodDays = selectedPeriod?.days ?? plan.duration_days
+          const periodPrice = selectedPeriod?.price ?? plan.price
+          const couponState = couponStates[plan.id]
+          const appliedCoupon = getAppliedCoupon(plan.id)
+          const { discount, finalPrice } = calculateDiscount(periodPrice, appliedCoupon)
 
-            return (
-              <Card key={plan.id} className={`flex flex-col ${plan.popular ? "border-primary shadow-lg shadow-primary/20" : ""}`}>
-                <CardHeader className="gap-4">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
-                        <Icon className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">{plan.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{periodLabel}</p>
-                      </div>
+          return (
+            <Card 
+              key={plan.id} 
+              className={`flex flex-col border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 ${
+                plan.popular ? "ring-2 ring-primary/50 shadow-primary/10" : ""
+              }`}
+            >
+              <CardHeader className="gap-4">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+                      <Icon className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="text-left md:text-right">
-                      <div className="text-4xl font-bold text-foreground">¥{finalPrice.toFixed(2)}</div>
-                      {discount > 0 && (
-                        <div className="text-sm text-muted-foreground line-through">¥{periodPrice.toFixed(2)}</div>
-                      )}
-                      <p className="text-xs text-muted-foreground">{periodDays > 0 ? `${periodDays} 天` : "一次性套餐"}</p>
-                      {discount > 0 && <p className="text-xs text-emerald-600">已优惠 ¥{discount.toFixed(2)}</p>}
+                    <div>
+                      <CardTitle className="text-xl">{plan.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{periodLabel}</p>
                     </div>
                   </div>
-                  {plan.popular && <Badge variant="default" className="w-fit">热门</Badge>}
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col gap-4">
-                  <div className="space-y-3 rounded-xl border border-dashed px-4 py-3">
-                    {plan.available_periods && plan.available_periods.length > 0 && (
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">计费周期</Label>
-                        <Select
-                          value={selectedKey ?? undefined}
-                          onValueChange={(value) => {
-                            setSelectedPeriods((prev) => ({
-                              ...prev,
-                              [plan.id]: value,
-                            }))
-                            setCouponStates((prev) => {
-                              const current = prev[plan.id]
-                              if (!current) return prev
-                              return {
-                                ...prev,
-                                [plan.id]: {
-                                  ...current,
-                                  status: "idle",
-                                  data: undefined,
-                                  message: undefined,
-                                },
-                              }
-                            })
-                          }}
-                        >
-                          <SelectTrigger className="h-9 text-left">
-                            <SelectValue placeholder="选择计费周期" />
-                          </SelectTrigger>
-                          <SelectContent align="start">
-                            {plan.available_periods.map((period) => (
-                              <SelectItem key={period.legacyKey} value={period.legacyKey}>
-                                {period.label} · ¥{period.price.toFixed(2)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <div className="text-left md:text-right">
+                    <div className="text-4xl font-bold text-foreground">¥{finalPrice.toFixed(2)}</div>
+                    {discount > 0 && (
+                      <div className="text-sm text-muted-foreground line-through">¥{periodPrice.toFixed(2)}</div>
                     )}
+                    <p className="text-xs text-muted-foreground">{periodDays > 0 ? `${periodDays} 天` : "一次性套餐"}</p>
+                    {discount > 0 && <p className="text-xs text-emerald-600">已优惠 ¥{discount.toFixed(2)}</p>}
+                  </div>
+                </div>
+                {plan.popular && <Badge variant="default" className="w-fit">热门</Badge>}
+              </CardHeader>
+              <CardContent className="flex flex-1 flex-col gap-4">
+                <div className="space-y-3 rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-3">
+                  {plan.available_periods && plan.available_periods.length > 0 && (
                     <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">折扣码</Label>
-                      <div className="flex w-full items-center gap-2">
-                        <div className="relative flex-1">
-                          <Input
-                            value={couponState?.code ?? ""}
-                            onChange={(event) => handleCouponInput(plan.id, event.target.value)}
-                            placeholder="输入折扣码"
-                            className="h-9 pr-9"
-                          />
-                          {(couponState?.code || couponState?.status === "valid") && (
-                            <button
-                              type="button"
-                              aria-label="清除折扣码"
-                              className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
-                              onClick={() => handleCouponClear(plan.id)}
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-9 px-4"
-                          onClick={() => handleCouponValidate(plan)}
-                          disabled={couponState?.status === "loading"}
-                        >
-                          {couponState?.status === "loading" ? "验证中" : "验证"}
-                        </Button>
-                      </div>
-                      {couponState?.status === "valid" && couponState.data && (
-                        <p className="text-xs text-emerald-600">
-                          已应用 {couponState.data.name || couponState.data.code}，立减 ¥{discount.toFixed(2)}
-                        </p>
-                      )}
-                      {couponState?.status === "error" && couponState.message && (
-                        <p className="text-xs text-destructive">{couponState.message}</p>
-                      )}
+                      <Label className="text-xs text-muted-foreground">计费周期</Label>
+                      <Select
+                        value={selectedKey ?? undefined}
+                        onValueChange={(value) => {
+                          setSelectedPeriods((prev) => ({
+                            ...prev,
+                            [plan.id]: value,
+                          }))
+                          setCouponStates((prev) => {
+                            const current = prev[plan.id]
+                            if (!current) return prev
+                            return {
+                              ...prev,
+                              [plan.id]: {
+                                ...current,
+                                status: "idle",
+                                data: undefined,
+                                message: undefined,
+                              },
+                            }
+                          })
+                        }}
+                      >
+                        <SelectTrigger className="h-9 text-left bg-background/50">
+                          <SelectValue placeholder="选择计费周期" />
+                        </SelectTrigger>
+                        <SelectContent align="start">
+                          {plan.available_periods.map((period) => (
+                            <SelectItem key={period.legacyKey} value={period.legacyKey}>
+                              {period.label} · ¥{period.price.toFixed(2)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-
-                  <div className="rounded-lg bg-muted/30 p-3 text-sm">
-                    <div className="space-y-2 md:hidden">
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span>流量额度</span>
-                        <span className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span>速率限制</span>
-                        <span className="font-semibold text-foreground">
-                          {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span>设备数量</span>
-                        <span className="font-semibold text-foreground">
-                          {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
-                        </span>
-                      </div>
-                    </div>
-                    <dl className="hidden gap-3 md:grid md:grid-cols-3">
-                      <div className="space-y-1">
-                        <dt className="text-muted-foreground">流量额度</dt>
-                        <dd className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</dd>
-                      </div>
-                      <div className="space-y-1">
-                        <dt className="text-muted-foreground">速率限制</dt>
-                        <dd className="font-semibold text-foreground">
-                          {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
-                        </dd>
-                      </div>
-                      <div className="space-y-1">
-                        <dt className="text-muted-foreground">设备数量</dt>
-                        <dd className="font-semibold text-foreground">
-                          {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  {plan.features && plan.features.length > 0 && (
-                    <ul className="space-y-2 text-sm">
-                      {plan.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-muted-foreground">
-                          <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
                   )}
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    className="w-full"
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() => handlePurchase(plan)}
-                    disabled={purchasing === plan.id}
-                  >
-                    {purchasing === plan.id ? "处理中..." : "立即购买"}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )
-          })}
-        </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">折扣码</Label>
+                    <div className="flex w-full items-center gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          value={couponState?.code ?? ""}
+                          onChange={(event) => handleCouponInput(plan.id, event.target.value)}
+                          placeholder="输入折扣码"
+                          className="h-9 pr-9 bg-background/50"
+                        />
+                        {(couponState?.code || couponState?.status === "valid") && (
+                          <button
+                            type="button"
+                            aria-label="清除折扣码"
+                            className="absolute inset-y-0 right-2 flex items-center text-muted-foreground hover:text-foreground"
+                            onClick={() => handleCouponClear(plan.id)}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-9 px-4 bg-background/50"
+                        onClick={() => handleCouponValidate(plan)}
+                        disabled={couponState?.status === "loading"}
+                      >
+                        {couponState?.status === "loading" ? "验证中" : "验证"}
+                      </Button>
+                    </div>
+                    {couponState?.status === "valid" && couponState.data && (
+                      <p className="text-xs text-emerald-600">
+                        已应用 {couponState.data.name || couponState.data.code}，立减 ¥{discount.toFixed(2)}
+                      </p>
+                    )}
+                    {couponState?.status === "error" && couponState.message && (
+                      <p className="text-xs text-destructive">{couponState.message}</p>
+                    )}
+                  </div>
+                </div>
 
-        {plans.length === 0 && (
-          <Card>
+                <div className="rounded-lg bg-muted/30 p-3 text-sm">
+                  <div className="space-y-2 md:hidden">
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>流量额度</span>
+                      <span className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>速率限制</span>
+                      <span className="font-semibold text-foreground">
+                        {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>设备数量</span>
+                      <span className="font-semibold text-foreground">
+                        {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
+                      </span>
+                    </div>
+                  </div>
+                  <dl className="hidden gap-3 md:grid md:grid-cols-3">
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground">流量额度</dt>
+                      <dd className="font-semibold text-foreground">{formatDataVolume(plan.bandwidth)}</dd>
+                    </div>
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground">速率限制</dt>
+                      <dd className="font-semibold text-foreground">
+                        {plan.speed_limit ? `${plan.speed_limit} Mbps` : "不限速"}
+                      </dd>
+                    </div>
+                    <div className="space-y-1">
+                      <dt className="text-muted-foreground">设备数量</dt>
+                      <dd className="font-semibold text-foreground">
+                        {typeof plan.device_limit === "number" ? `${plan.device_limit} 台` : "不限制"}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+
+                {plan.features && plan.features.length > 0 && (
+                  <ul className="space-y-2 text-sm">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button
+                  className="w-full shadow-md hover:shadow-lg transition-all"
+                  variant={plan.popular ? "default" : "outline"}
+                  onClick={() => handlePurchase(plan)}
+                  disabled={purchasing === plan.id}
+                >
+                  {purchasing === plan.id ? "处理中..." : "立即购买"}
+                </Button>
+              </CardFooter>
+            </Card>
+          )
+        })}
+      </motion.div>
+
+      {plans.length === 0 && (
+        <motion.div variants={item}>
+          <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
             <CardContent className="flex min-h-[200px] items-center justify-center">
               <div className="text-center">
                 <p className="text-muted-foreground">暂无可用套餐</p>
               </div>
             </CardContent>
           </Card>
-        )}
-      </div>
+        </motion.div>
+      )}
 
       <Dialog
         open={Boolean(orderInfo)}
@@ -494,7 +520,7 @@ export default function SubscribePage() {
           if (!open) setOrderInfo(null)
         }}
       >
-        <DialogContent className="max-h-[min(90vh,700px)] overflow-y-auto">
+        <DialogContent className="max-h-[min(90vh,700px)] overflow-y-auto border-none shadow-2xl bg-card/95 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>订单已创建</DialogTitle>
             <DialogDescription>请前往订单中心完成支付</DialogDescription>
@@ -520,7 +546,7 @@ export default function SubscribePage() {
             </div>
           )}
           <DialogFooter className="gap-2 sm:gap-3">
-            <Button variant="outline" onClick={() => setOrderInfo(null)}>
+            <Button variant="outline" onClick={() => setOrderInfo(null)} className="bg-background/50">
               继续选购
             </Button>
             <Button
@@ -541,7 +567,7 @@ export default function SubscribePage() {
           if (!open) setErrorDialog(null)
         }}
       >
-        <DialogContent>
+        <DialogContent className="border-none shadow-2xl bg-card/95 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>{errorDialog?.title ?? "操作提示"}</DialogTitle>
             <DialogDescription>{errorDialog?.description}</DialogDescription>
@@ -551,6 +577,6 @@ export default function SubscribePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </motion.div>
   )
 }

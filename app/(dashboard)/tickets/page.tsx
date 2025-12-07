@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +34,21 @@ interface Ticket {
   created_at: string
   updated_at: string
   priority?: string
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function TicketsPage() {
@@ -199,15 +215,15 @@ export default function TicketsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">我的工单</h1>
-            <p className="text-muted-foreground">查看和管理您的支持工单</p>
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-5 w-64" />
           </div>
           <Skeleton className="h-10 w-32" />
         </div>
 
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
+            <Card key={i} className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
               <CardHeader>
                 <Skeleton className="h-6 w-48" />
               </CardHeader>
@@ -222,15 +238,20 @@ export default function TicketsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <motion.div 
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-balance text-foreground">我的工单</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">我的工单</h1>
           <p className="text-muted-foreground">查看和管理您的支持工单</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-background/50">
               <SelectValue placeholder="筛选状态" />
             </SelectTrigger>
             <SelectContent>
@@ -243,12 +264,12 @@ export default function TicketsPage() {
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="shadow-md hover:shadow-lg transition-all">
                 <Plus className="mr-2 h-4 w-4" />
                 创建工单
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[525px] max-h-[min(90vh,700px)] overflow-y-auto">
+            <DialogContent className="sm:max-w-[525px] max-h-[min(90vh,700px)] overflow-y-auto border-none shadow-2xl bg-card/95 backdrop-blur-xl">
               <DialogHeader>
                 <DialogTitle>创建新工单</DialogTitle>
                 <DialogDescription>描述您遇到的问题，我们的客服团队将尽快回复</DialogDescription>
@@ -266,6 +287,7 @@ export default function TicketsPage() {
                     placeholder="简要描述您的问题"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
+                    className="bg-background/50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -276,10 +298,10 @@ export default function TicketsPage() {
                     rows={6}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="break-all"
+                    className="break-all bg-background/50"
                   />
                   <div className="flex flex-wrap gap-2">
-                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage || creating}>
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage || creating} className="bg-background/50">
                       {uploadingImage ? (
                         <span className="flex items-center gap-2">
                           <Spinner className="size-4" /> 上传中...
@@ -308,7 +330,7 @@ export default function TicketsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="priority">优先级</Label>
                   <Select value={priority} onValueChange={setPriority}>
-                    <SelectTrigger id="priority">
+                    <SelectTrigger id="priority" className="bg-background/50">
                       <SelectValue placeholder="请选择优先级" />
                     </SelectTrigger>
                     <SelectContent>
@@ -320,7 +342,7 @@ export default function TicketsPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={creating}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={creating} className="bg-background/50">
                   取消
                 </Button>
                 <Button onClick={handleCreateTicket} disabled={creating}>
@@ -337,96 +359,109 @@ export default function TicketsPage() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
+      </motion.div>
 
       {filteredTickets.length === 0 ? (
-        <Card>
-          <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center bg-muted">
-              <MessageSquare className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <div className="text-center">
-              <p className="font-medium text-foreground">暂无工单</p>
-              <p className="text-sm text-muted-foreground">您还没有创建任何支持工单</p>
-            </div>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              创建第一个工单
-            </Button>
-          </CardContent>
-        </Card>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
+                <MessageSquare className="h-8 w-8 text-muted-foreground opacity-50" />
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-foreground">暂无工单</p>
+                <p className="text-sm text-muted-foreground">您还没有创建任何支持工单</p>
+              </div>
+              <Button onClick={() => setDialogOpen(true)} className="shadow-md hover:shadow-lg transition-all">
+                <Plus className="mr-2 h-4 w-4" />
+                创建第一个工单
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
         <div className="space-y-4">
           {filteredTickets.map((ticket) => (
-            <Card
+            <motion.div 
               key={ticket.id}
-              className="cursor-pointer transition-colors hover:bg-accent"
-              onClick={() => router.push(`/tickets/${ticket.id}`)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5 text-primary" />
-                      {ticket.subject}
-                    </CardTitle>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {new Date(ticket.created_at).toLocaleDateString("zh-CN")}
-                      </span>
-                      {ticket.priority && <Badge variant="outline">{ticket.priority}</Badge>}
-                    </div>
-                  </div>
-                  {getStatusBadge(ticket.status)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  工单编号: <span className="font-mono">{ticket.id}</span>
-                </div>
-                {ticket.updated_at && (
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    最后更新: {new Date(ticket.updated_at).toLocaleString("zh-CN")}
-                  </div>
-                )}
-                {ticket.status !== "closed" && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        router.push(`/tickets/${ticket.id}`)
-                      }}
-                    >
-                      查看详情
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleCloseTicket(ticket.id)
-                      }}
-                      disabled={closingTicketId === ticket.id}
-                    >
-                      {closingTicketId === ticket.id ? (
-                        <span className="flex items-center gap-2">
-                          <Spinner className="size-3.5" />
-                          关闭中...
+              <Card
+                className="cursor-pointer transition-all hover:bg-card/80 border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl hover:-translate-y-0.5"
+                onClick={() => router.push(`/tickets/${ticket.id}`)}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <MessageSquare className="h-5 w-5 text-primary" />
+                        {ticket.subject}
+                      </CardTitle>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {new Date(ticket.created_at).toLocaleDateString("zh-CN")}
                         </span>
-                      ) : (
-                        "关闭工单"
-                      )}
-                    </Button>
+                        {ticket.priority && <Badge variant="outline" className="bg-background/50">{ticket.priority}</Badge>}
+                      </div>
+                    </div>
+                    {getStatusBadge(ticket.status)}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    工单编号: <span className="font-mono">{ticket.id}</span>
+                  </div>
+                  {ticket.updated_at && (
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      最后更新: {new Date(ticket.updated_at).toLocaleString("zh-CN")}
+                    </div>
+                  )}
+                  {ticket.status !== "closed" && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-background/50 hover:bg-background/80"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/tickets/${ticket.id}`)
+                        }}
+                      >
+                        查看详情
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="hover:bg-destructive/10 hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleCloseTicket(ticket.id)
+                        }}
+                        disabled={closingTicketId === ticket.id}
+                      >
+                        {closingTicketId === ticket.id ? (
+                          <span className="flex items-center gap-2">
+                            <Spinner className="size-3.5" />
+                            关闭中...
+                          </span>
+                        ) : (
+                          "关闭工单"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

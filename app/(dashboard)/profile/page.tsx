@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { User, Mail, Calendar, Shield } from "lucide-react"
+import { User, Mail, Calendar, Shield, Lock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { getErrorMessage } from "@/lib/errors"
@@ -20,6 +21,21 @@ interface UserInfo {
   email: string
   created_at: string
   subscription_status?: string
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function ProfilePage() {
@@ -56,28 +72,38 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">个人中心</h1>
-          <p className="text-muted-foreground">管理您的账户信息</p>
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-5 w-64" />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 h-[300px]">
             <CardHeader>
-              <Skeleton className="h-24 w-24" />
+              <Skeleton className="h-24 w-24 rounded-full mx-auto" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-6 w-32 mx-auto" />
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-32 w-full" />
-            </CardContent>
-          </Card>
+          <div className="space-y-6 lg:col-span-2">
+            <Card className="h-[200px]">
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+            <Card className="h-[300px]">
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     )
@@ -141,132 +167,159 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-balance text-foreground">个人中心</h1>
+    <motion.div 
+      className="space-y-8"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">个人中心</h1>
         <p className="text-muted-foreground">管理您的账户信息</p>
-      </div>
+      </motion.div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <div className="flex flex-col items-center gap-4">
-              <Avatar className="h-24 w-24">
-                <AvatarFallback className="text-2xl">{userInfo ? getInitials(userInfo.username) : "U"}</AvatarFallback>
-              </Avatar>
-              <div className="text-center">
-                <h3 className="text-xl font-semibold">{userInfo?.username}</h3>
-                <p className="text-sm text-muted-foreground">{userInfo?.email}</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 bg-muted p-3">
-                <Shield className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">账户状态</p>
-                  <p className="text-xs text-muted-foreground">{userInfo?.subscription_status || "正常"}</p>
+        <motion.div variants={item} className="lg:col-span-1">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl" />
+                  <Avatar className="h-24 w-24 border-4 border-background shadow-xl relative">
+                    <AvatarFallback className="text-3xl bg-primary/10 text-primary font-bold">
+                      {userInfo ? getInitials(userInfo.username) : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="text-center space-y-1">
+                  <h3 className="text-xl font-bold">{userInfo?.username}</h3>
+                  <p className="text-sm text-muted-foreground font-medium">{userInfo?.email}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-muted p-3">
-                <Calendar className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">注册时间</p>
-                  <p className="text-xs text-muted-foreground">
-                    {userInfo?.created_at ? new Date(userInfo.created_at).toLocaleDateString("zh-CN") : "-"}
-                  </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Shield className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">账户状态</p>
+                    <p className="text-xs text-muted-foreground">{userInfo?.subscription_status || "正常"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">注册时间</p>
+                    <p className="text-xs text-muted-foreground">
+                      {userInfo?.created_at ? new Date(userInfo.created_at).toLocaleDateString("zh-CN") : "-"}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                基本信息
-              </CardTitle>
-              <CardDescription>查看和管理您的个人信息</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="username">用户名</Label>
-                  <Input id="username" value={userInfo?.username || ""} disabled />
+          <motion.div variants={item}>
+            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-primary" />
+                  基本信息
+                </CardTitle>
+                <CardDescription>查看和管理您的个人信息</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">用户名</Label>
+                    <Input id="username" value={userInfo?.username || ""} disabled className="bg-muted/50" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">邮箱</Label>
+                    <Input id="email" type="email" value={userInfo?.email || ""} disabled className="bg-muted/50" />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">邮箱</Label>
-                  <Input id="email" type="email" value={userInfo?.email || ""} disabled />
+                  <Label htmlFor="user-id">用户 ID</Label>
+                  <Input id="user-id" value={userInfo?.id || ""} disabled className="font-mono bg-muted/50" />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="user-id">用户 ID</Label>
-                <Input id="user-id" value={userInfo?.id || ""} disabled />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                修改密码
-              </CardTitle>
-              <CardDescription>更新您的账户密码</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {passwordError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{passwordError}</AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="current-password">当前密码</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  autoComplete="current-password"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-password">新密码</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  autoComplete="new-password"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">确认新密码</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  autoComplete="new-password"
-                />
-              </div>
-              <Button className="w-full sm:w-auto" onClick={handlePasswordUpdate} disabled={updatingPassword}>
-                {updatingPassword ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Spinner />
-                    更新中...
-                  </span>
-                ) : (
-                  "更新密码"
+          <motion.div variants={item}>
+            <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-primary" />
+                  修改密码
+                </CardTitle>
+                <CardDescription>更新您的账户密码以保护账户安全</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {passwordError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{passwordError}</AlertDescription>
+                  </Alert>
                 )}
-              </Button>
-            </CardContent>
-          </Card>
+                <div className="space-y-2">
+                  <Label htmlFor="current-password">当前密码</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    autoComplete="current-password"
+                    className="bg-background/50"
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">新密码</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      autoComplete="new-password"
+                      className="bg-background/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">确认新密码</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      autoComplete="new-password"
+                      className="bg-background/50"
+                    />
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <Button className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all" onClick={handlePasswordUpdate} disabled={updatingPassword}>
+                    {updatingPassword ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Spinner />
+                        更新中...
+                      </span>
+                    ) : (
+                      "更新密码"
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -1,8 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Seele Cloud",
@@ -19,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased relative">
+      <body className={`${inter.className} antialiased relative`}>
         <div className="fixed inset-0 -z-10">
           <div
             className="absolute inset-0"
@@ -31,7 +34,7 @@ export default function RootLayout({
               backgroundPosition: "center",
             }}
           />
-          <div className="absolute inset-0 bg-white/70 dark:bg-black/75" />
+          <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-[2px]" />
         </div>
         <ThemeProvider defaultTheme="light">{children}</ThemeProvider>
         <Analytics />

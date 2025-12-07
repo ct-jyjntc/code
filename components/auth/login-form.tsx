@@ -75,7 +75,7 @@ export function LoginForm() {
 
   return (
     <>
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border-none shadow-2xl bg-card/50 backdrop-blur-xl">
         <CardHeader>
           <CardTitle className="text-2xl">登录</CardTitle>
           <CardDescription>输入您的凭据以访问您的账户</CardDescription>

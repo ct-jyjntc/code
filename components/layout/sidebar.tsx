@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { removeAuthToken } from "@/lib/auth"
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion"
 
 const navItems = [
   { href: "/dashboard", label: "仪表盘", icon: LayoutDashboard },
@@ -51,15 +52,19 @@ export function Sidebar() {
   }
 
   return (
-    <div className="hidden h-screen w-64 flex-col border-r border-border bg-card lg:flex">
-      <div className="flex h-16 items-center justify-between border-b border-border px-6">
+    <div className="hidden h-screen w-64 flex-col border-r border-border/50 bg-background/60 backdrop-blur-xl lg:flex">
+      <div className="flex h-16 items-center justify-between border-b border-border/50 px-6">
         <div className="flex flex-col leading-tight">
-          <span className="text-xl font-semibold text-foreground tracking-tight">Seele Cloud</span>
-          <span className="text-xs uppercase text-muted-foreground tracking-[0.2em]">Control Panel</span>
+          <span className="text-xl font-bold text-primary tracking-tight">
+            Seele Cloud
+          </span>
+          <span className="text-[10px] uppercase text-muted-foreground tracking-[0.2em] font-medium">
+            Control Panel
+          </span>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-none">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
@@ -69,26 +74,41 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 border px-3 py-2 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
               )}
             >
-              <Icon className="h-5 w-5" />
-              {item.label}
+              {isActive && (
+                <motion.div
+                  layoutId="activeNav"
+                  className="absolute inset-0 rounded-lg bg-primary/10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                />
+              )}
+              <Icon className={cn("h-5 w-5 transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+              <span className="relative z-10">{item.label}</span>
+              {isActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute left-0 h-full w-1 rounded-r-full bg-primary"
+                />
+              )}
             </Link>
           )
         })}
       </nav>
 
-      <div className="border-t border-border px-4 py-3">
+      <div className="border-t border-border/50 px-4 py-4 bg-background/40">
         <div className="flex items-center justify-between gap-2">
           <ThemeToggle />
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="border text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />

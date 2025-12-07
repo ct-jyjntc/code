@@ -218,7 +218,7 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-none shadow-2xl bg-card/50 backdrop-blur-xl">
       <CardHeader>
         <CardTitle className="text-2xl">注册</CardTitle>
         <CardDescription>创建一个新账户以开始使用</CardDescription>

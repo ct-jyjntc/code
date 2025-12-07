@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { use, useEffect, useMemo, useState } from "react"
 import { AlertTriangle, ArrowLeft, Info, RefreshCw } from "lucide-react"
+import { motion } from "framer-motion"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -39,6 +40,21 @@ const RANGE_HOURS: Record<TimeRangeKey, number> = {
   "1h": 1,
   "4h": 4,
   "24h": 24,
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid: string }> }) {
@@ -199,7 +215,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
         <Skeleton className="h-4 w-64" />
       </div>
 
-      <Card>
+      <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
         <CardHeader className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
             <Skeleton className="h-5 w-24" />
@@ -229,10 +245,20 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <motion.div 
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="flex flex-wrap items-start justify-between gap-4"
+      >
         <div className="space-y-3">
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild className="hover:bg-background/50">
             <Link href="/realtime">
               <ArrowLeft className="mr-2 h-4 w-4" />
               返回实时流量
@@ -248,7 +274,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
 
         <div className="flex flex-col items-end gap-3">
           <Tabs value={range} onValueChange={(value) => setRange(value as TimeRangeKey)}>
-            <TabsList>
+            <TabsList className="bg-background/50">
               <TabsTrigger value="1h">1小时</TabsTrigger>
               <TabsTrigger value="4h">4小时</TabsTrigger>
               <TabsTrigger value="24h">1天</TabsTrigger>
@@ -258,64 +284,76 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
             <span>
               最近更新：{lastUpdated ? new Date(lastUpdated).toLocaleString("zh-CN", { hour12: false }) : "等待数据"}
             </span>
-            <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>
+            <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing} className="bg-background/50">
               <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {errorMessage && (
-        <Alert variant="destructive" className="border-destructive/40">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>加载异常</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Alert variant="destructive" className="border-destructive/40 bg-destructive/10">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>加载异常</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        </motion.div>
       )}
 
-      <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-4">
-          <CardTitle className="flex items-center gap-2">
-            <Info className="h-5 w-5 text-primary" />
-            节点状态
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            显示每个地区的最新延迟和丢包率
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {tasks.length === 0 ? (
-            <div className="text-sm text-muted-foreground">暂无监测任务</div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {tasks.map((task) => {
-                const latest = latestByTask.get(task.id)
-                return (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between rounded-lg border px-3 py-2"
-                  >
-                    <div className="space-y-1">
-                      <p className="font-medium text-foreground">{task.name || `任务 ${task.id}`}</p>
-                      <p className="text-xs text-muted-foreground">
-                        丢包率：{Number(task.loss ?? 0).toFixed(1)}%
-                      </p>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <CardHeader className="flex flex-wrap items-center justify-between gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <Info className="h-5 w-5 text-primary" />
+              节点状态
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              显示每个地区的最新延迟和丢包率
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {tasks.length === 0 ? (
+              <div className="text-sm text-muted-foreground">暂无监测任务</div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {tasks.map((task) => {
+                  const latest = latestByTask.get(task.id)
+                  return (
+                    <div
+                      key={task.id}
+                      className="flex items-center justify-between rounded-lg border border-border/50 bg-background/30 px-3 py-2 transition-colors hover:bg-background/50"
+                    >
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">{task.name || `任务 ${task.id}`}</p>
+                        <p className="text-xs text-muted-foreground">
+                          丢包率：{Number(task.loss ?? 0).toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-semibold text-foreground">
+                          {formatLatency(latest?.value)}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          更新时间：{latest?.time ? new Date(latest.time).toLocaleTimeString("zh-CN", { hour12: false }) : "-"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-foreground">
-                        {formatLatency(latest?.value)}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        更新时间：{latest?.time ? new Date(latest.time).toLocaleTimeString("zh-CN", { hour12: false }) : "-"}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                  )
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   )
 }

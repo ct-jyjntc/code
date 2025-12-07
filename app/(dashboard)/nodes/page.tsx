@@ -1,19 +1,39 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { api } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Server, Globe, SignalHigh } from "lucide-react"
+import { Server, Globe, SignalHigh, Wifi, Zap } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { getErrorMessage } from "@/lib/errors"
+
 
 interface Node {
   id: string
   name: string
   location: string
   status: "online" | "offline" | "maintenance"
+  type?: string
+  load?: number
+  rate?: number
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function NodesPage() {
@@ -45,14 +65,18 @@ export default function NodesPage() {
   }, [toast])
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
-      online: { variant: "default", label: "在线" },
-      offline: { variant: "destructive", label: "离线" },
-      maintenance: { variant: "secondary", label: "维护中" },
+    const statusMap: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string; className?: string }> = {
+      online: { variant: "default", label: "在线", className: "bg-green-500/15 text-green-600 hover:bg-green-500/25 border-green-500/20" },
+      offline: { variant: "destructive", label: "离线", className: "" },
+      maintenance: { variant: "secondary", label: "维护中", className: "bg-yellow-500/15 text-yellow-600 hover:bg-yellow-500/25 border-yellow-500/20" },
     }
 
     const statusInfo = statusMap[status] || { variant: "outline", label: "未知" }
-    return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+    return (
+      <Badge variant={statusInfo.variant} className={statusInfo.className}>
+        {statusInfo.label}
+      </Badge>
+    )
   }
 
   if (loading) {
@@ -60,11 +84,10 @@ export default function NodesPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">节点状态</h1>
-            <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-5 w-64" />
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <Skeleton className="h-4 w-20" />
+          <div className="flex flex-wrap items-center gap-4">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-4 w-20" />
           </div>
@@ -72,14 +95,11 @@ export default function NodesPage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i}>
+            <Card key={i} className="h-[180px] rounded-xl border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
               <CardHeader>
                 <Skeleton className="h-6 w-32" />
                 <Skeleton className="mt-2 h-4 w-24" />
               </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
             </Card>
           ))}
         </div>
@@ -87,80 +107,80 @@ export default function NodesPage() {
     )
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-balance text-foreground">节点状态</h1>
-          <p className="text-muted-foreground">查看所有可用节点的实时状态</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          <span>
-            总节点数：<span className="font-semibold text-foreground">{nodes.length}</span>
-          </span>
-          <span>
-            在线：<span className="font-semibold text-foreground">{nodes.filter((node) => node.status === "online").length}</span>
-          </span>
-          <span>
-            离线：<span className="font-semibold text-foreground">{nodes.filter((node) => node.status === "offline").length}</span>
-          </span>
-        </div>
-      </div>
+  const onlineCount = nodes.filter(n => n.status === 'online').length
+  const totalCount = nodes.length
 
-      {nodes.length === 0 ? (
-        <Card>
-          <CardContent className="flex min-h-[300px] flex-col items-center justify-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center bg-muted">
-              <Server className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <div className="text-center">
-              <p className="font-medium text-foreground">暂无节点</p>
-              <p className="text-sm text-muted-foreground">当前没有可用的节点</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {nodes.map((node) => (
-            <Card
-              key={node.id}
-              className={
-                node.status === "online"
-                  ? "border-primary/30"
-                  : node.status === "offline"
-                    ? "border-destructive/30"
-                    : ""
-              }
-            >
-              <div className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center ${
-                      node.status === "online"
-                        ? "bg-primary/10"
-                        : node.status === "offline"
-                          ? "bg-destructive/10"
-                          : "bg-secondary"
-                    }`}
-                  >
-                    <Server
-                      className={`h-4 w-4 ${
-                        node.status === "online"
-                          ? "text-primary"
-                          : node.status === "offline"
-                            ? "text-destructive"
-                            : "text-secondary-foreground"
-                      }`}
-                    />
-                  </div>
-                  <div className="text-sm font-medium text-foreground">{node.name}</div>
-                </div>
-                {getStatusBadge(node.status)}
-              </div>
-            </Card>
-          ))}
+  return (
+    <motion.div 
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">节点列表</h1>
+          <p className="text-muted-foreground">查看所有可用节点及其状态</p>
         </div>
-      )}
-    </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card/50 px-3 py-1.5 rounded-full border border-border/50">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <span>在线: {onlineCount}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card/50 px-3 py-1.5 rounded-full border border-border/50">
+            <Server className="h-3 w-3" />
+            <span>总计: {totalCount}</span>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {nodes.map((node, index) => (
+          <motion.div
+            key={node.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
+          <Card 
+            className="h-full overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm transition-all hover:shadow-xl hover:-translate-y-1 group"
+          >
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+              <div className="space-y-1">
+                <CardTitle className="flex items-center gap-2 text-base font-medium">
+                  <Globe className="h-4 w-4 text-primary" />
+                  {node.name}
+                </CardTitle>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Zap className="h-3 w-3" />
+                    {node.type || "标准节点"}
+                  </span>
+                  {node.rate && (
+                    <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-background/50">
+                      {node.rate}x 倍率
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              {getStatusBadge(node.status)}
+            </CardHeader>
+            <CardContent>
+              <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Wifi className="h-3 w-3" />
+                  <span>{node.location || "未知位置"}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <SignalHigh className="h-3 w-3" />
+                  <span>优选线路</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
   )
 }

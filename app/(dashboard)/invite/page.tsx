@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +31,21 @@ interface InviteStats {
   available_commission: number
   available_commission_raw: number
   commission_rate: number
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function InvitePage() {
@@ -221,8 +237,8 @@ export default function InvitePage() {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">我的邀请</h1>
-          <p className="text-muted-foreground">邀请好友并获得返佣</p>
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-5 w-64" />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -257,226 +273,275 @@ export default function InvitePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-balance text-foreground">我的邀请</h1>
+    <motion.div 
+      className="space-y-6"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">我的邀请</h1>
         <p className="text-muted-foreground">邀请好友并获得返佣</p>
-      </div>
+      </motion.div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">总邀请</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total_invites}</div>
-            <p className="text-xs text-muted-foreground">已成功邀请人数</p>
-          </CardContent>
-        </Card>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">总邀请</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total_invites}</div>
+              <p className="text-xs text-muted-foreground">已成功邀请人数</p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">活跃邀请</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.active_invites}</div>
-            <p className="text-xs text-muted-foreground">仍在订阅中</p>
-          </CardContent>
-        </Card>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">活跃邀请</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.active_invites}</div>
+              <p className="text-xs text-muted-foreground">仍在订阅中</p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">佣金概览</CardTitle>
-            <Gift className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div>
-              <div className="text-2xl font-bold">¥{stats.available_commission.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">可用佣金</p>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              累计返佣 ¥{stats.commission_earned.toFixed(2)} · 待确认 ¥
-              {stats.pending_commission.toFixed(2)} · 返佣比例 {stats.commission_rate}%
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">佣金概览</CardTitle>
+              <Gift className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div>
+                <div className="text-2xl font-bold">¥{stats.available_commission.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">可用佣金</p>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                累计返佣 ¥{stats.commission_earned.toFixed(2)} · 待确认 ¥
+                {stats.pending_commission.toFixed(2)} · 返佣比例 {stats.commission_rate}%
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ArrowRightLeft className="h-5 w-5" />
-              划转至账户余额
-            </CardTitle>
-            <CardDescription>将可用佣金划转为账户余额，用于购买套餐</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-sm text-muted-foreground">
-              当前可划转：<span className="font-semibold text-foreground">¥{stats.available_commission.toFixed(2)}</span>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="transfer-amount">划转金额（¥）</Label>
-              <Input
-                id="transfer-amount"
-                type="number"
-                inputMode="decimal"
-                placeholder="例如 50"
-                min="0"
-                step="0.01"
-                value={transferAmount}
-                onChange={(e) => setTransferAmount(e.target.value)}
-              />
-            </div>
-            <Button className="w-full sm:w-auto" onClick={handleTransfer} disabled={transferring}>
-              {transferring ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Spinner />
-                  划转中...
-                </span>
-              ) : (
-                "确认划转"
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ArrowRightLeft className="h-5 w-5 text-primary" />
+                划转至账户余额
+              </CardTitle>
+              <CardDescription>将可用佣金划转为账户余额，用于购买套餐</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm text-muted-foreground p-3 rounded-lg bg-background/50 border border-border/50">
+                当前可划转：<span className="font-semibold text-foreground">¥{stats.available_commission.toFixed(2)}</span>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="transfer-amount">划转金额（¥）</Label>
+                <Input
+                  id="transfer-amount"
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="例如 50"
+                  min="0"
+                  step="0.01"
+                  value={transferAmount}
+                  onChange={(e) => setTransferAmount(e.target.value)}
+                  className="bg-background/50"
+                />
+              </div>
+              <Button className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all" onClick={handleTransfer} disabled={transferring}>
+                {transferring ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner />
+                    划转中...
+                  </span>
+                ) : (
+                  "确认划转"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="h-5 w-5" />
-              推广佣金提现
-            </CardTitle>
-            <CardDescription>提交提现申请，系统会自动创建工单</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>提现方式</Label>
-              {withdrawMethods.length === 0 ? (
-                <p className="text-xs text-muted-foreground">暂无可用提现方式，请联系管理员</p>
-              ) : (
-                <Select value={withdrawMethod} onValueChange={setWithdrawMethod}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择提现方式" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {withdrawMethods.map((method) => (
-                      <SelectItem key={method} value={method}>
-                        {method}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="withdraw-account">收款账号 / 备注</Label>
-              <Input
-                id="withdraw-account"
-                placeholder="请输入收款账号或备注信息"
-                value={withdrawAccount}
-                onChange={(e) => setWithdrawAccount(e.target.value)}
-              />
-            </div>
-            <Button
-              className="w-full sm:w-auto"
-              onClick={handleWithdraw}
-              disabled={withdrawing || withdrawMethods.length === 0}
-            >
-              {withdrawing ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Spinner />
-                  提交中...
-                </span>
-              ) : (
-                "提交提现申请"
-              )}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              提交后系统会创建工单，请等待客服审核处理。
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-primary" />
+                推广佣金提现
+              </CardTitle>
+              <CardDescription>提交提现申请，系统会自动创建工单</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>提现方式</Label>
+                {withdrawMethods.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">暂无可用提现方式，请联系管理员</p>
+                ) : (
+                  <Select value={withdrawMethod} onValueChange={setWithdrawMethod}>
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="选择提现方式" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {withdrawMethods.map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="withdraw-account">收款账号 / 备注</Label>
+                <Input
+                  id="withdraw-account"
+                  placeholder="请输入收款账号或备注信息"
+                  value={withdrawAccount}
+                  onChange={(e) => setWithdrawAccount(e.target.value)}
+                  className="bg-background/50"
+                />
+              </div>
+              <Button
+                className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all"
+                onClick={handleWithdraw}
+                disabled={withdrawing || withdrawMethods.length === 0}
+              >
+                {withdrawing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner />
+                    提交中...
+                  </span>
+                ) : (
+                  "提交提现申请"
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                提交后系统会创建工单，请等待客服审核处理。
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            生成邀请码
-          </CardTitle>
-          <CardDescription>创建新的邀请码分享给好友，当他们注册并订阅后，您将获得返佣</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={handleGenerateCode} disabled={generating}>
-            {generating ? (
-              <span className="flex items-center gap-2">
-                <Spinner />
-                生成中...
-              </span>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                生成新邀请码
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" />
+              生成邀请码
+            </CardTitle>
+            <CardDescription>创建新的邀请码分享给好友，当他们注册并订阅后，您将获得返佣</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleGenerateCode} disabled={generating} className="shadow-md hover:shadow-lg transition-all">
+              {generating ? (
+                <span className="flex items-center gap-2">
+                  <Spinner />
+                  生成中...
+                </span>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  生成新邀请码
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            邀请记录
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {invites.length === 0 ? (
-            <div className="flex min-h-[200px] items-center justify-center">
-              <div className="text-center">
-                <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">暂无邀请记录</p>
-                <p className="text-xs text-muted-foreground">点击上方按钮生成您的第一个邀请码</p>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+      >
+        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              邀请记录
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {invites.length === 0 ? (
+              <div className="flex min-h-[200px] items-center justify-center">
+                <div className="text-center">
+                  <Users className="mx-auto h-12 w-12 text-muted-foreground opacity-20" />
+                  <p className="mt-2 text-sm text-muted-foreground">暂无邀请记录</p>
+                  <p className="text-xs text-muted-foreground">点击上方按钮生成您的第一个邀请码</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>邀请码</TableHead>
-                    <TableHead>创建时间</TableHead>
-                    <TableHead className="text-right">操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invites.map((invite) => (
-                    <TableRow key={invite.id}>
-                      <TableCell className="font-mono font-medium">{invite.code}</TableCell>
-                      <TableCell>{new Date(invite.created_at).toLocaleDateString("zh-CN")}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="inline-flex items-center gap-2"
-                          onClick={() => handleCopyCode(invite.code)}
-                        >
-                          <Copy className="h-4 w-4" />
-                          复制链接
-                        </Button>
-                      </TableCell>
+            ) : (
+              <div className="rounded-md border border-border/50 overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>邀请码</TableHead>
+                      <TableHead>创建时间</TableHead>
+                      <TableHead className="text-right">操作</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {invites.map((invite) => (
+                      <TableRow key={invite.id} className="hover:bg-muted/50">
+                        <TableCell className="font-mono font-medium">{invite.code}</TableCell>
+                        <TableCell>{new Date(invite.created_at).toLocaleDateString("zh-CN")}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="inline-flex items-center gap-2 hover:bg-primary/10 hover:text-primary"
+                            onClick={() => handleCopyCode(invite.code)}
+                          >
+                            <Copy className="h-4 w-4" />
+                            复制链接
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
-    </div>
+    </motion.div>
   )
 }

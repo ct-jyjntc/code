@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -8,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
-import { Check, Copy, Loader2, RefreshCw, ShieldCheck, TimerReset } from "lucide-react"
+import { Check, Copy, Loader2, RefreshCw, ShieldCheck, TimerReset, Gauge, Zap, Smartphone, Download } from "lucide-react"
 import { getErrorMessage } from "@/lib/errors"
 
 interface SubscriptionInfo {
@@ -30,6 +31,23 @@ interface SubscriptionInfo {
   next_reset_at?: string
   last_reset_at?: string
   remarks?: string
+  speed_limit?: number
+  device_limit?: number
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function SubscriptionPage() {
@@ -101,23 +119,18 @@ export default function SubscriptionPage() {
     }
   }
 
-  useEffect(() => {
-    return () => {
-      if (copyResetRef.current) clearTimeout(copyResetRef.current)
-    }
-  }, [])
-
-  const handleResetSecurity = async () => {
+  const handleResetToken = async () => {
+    if (action === "reset") return
     setAction("reset")
     try {
-      const data = await api.resetSecurity()
-      setSubscription(data)
-      toast({ title: "重置成功", description: "已重新生成订阅链接和安全凭据" })
+      const newSubInfo = await api.resetSubscriptionToken()
+      setSubscription(newSubInfo)
+      toast({ title: "重置成功", description: "订阅链接已更新，请重新导入到客户端" })
     } catch (error) {
-      console.error("Failed to reset security:", error)
+      console.error("Failed to reset token:", error)
       toast({
-        title: "操作失败",
-        description: getErrorMessage(error, "无法重置，请稍后重试。"),
+        title: "重置失败",
+        description: getErrorMessage(error, "无法重置订阅链接，请稍后重试。"),
         variant: "destructive",
       })
     } finally {
@@ -129,202 +142,199 @@ export default function SubscriptionPage() {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-balance text-foreground">我的订阅</h1>
-          <p className="text-muted-foreground">查看订阅详情、管理安全信息与活跃会话</p>
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-5 w-64" />
         </div>
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <Skeleton className="h-6 w-40" />
-              <Skeleton className="h-4 w-56" />
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="flex flex-wrap items-center gap-3">
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-5 w-24" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-2 w-full" />
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="rounded-lg border p-4 space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-5 w-20" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                ))}
-              </div>
-              <Skeleton className="h-14 w-full" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-4 w-48" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Skeleton className="h-32 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </CardContent>
-          </Card>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-[200px] rounded-xl" />
+          <Skeleton className="h-[200px] rounded-xl" />
         </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48" />
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="rounded-lg border p-4 space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-5 w-28" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (!subscription) {
-    return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center space-y-3 rounded-lg border border-dashed p-6 text-center">
-        <ShieldCheck className="h-10 w-10 text-muted-foreground" />
-        <p className="text-lg font-medium">暂无订阅信息</p>
-        <p className="text-sm text-muted-foreground">请先购买套餐，系统将自动生成订阅详情</p>
-        <Button asChild>
-          <a href="/subscribe">前往购买套餐</a>
-        </Button>
+        <Skeleton className="h-[300px] rounded-xl" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-balance text-foreground">我的订阅</h1>
-        <p className="text-muted-foreground">查看订阅详情、管理安全信息与活跃会话</p>
+    <motion.div 
+      className="space-y-8"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item} className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">我的订阅</h1>
+        <p className="text-muted-foreground">管理您的订阅信息与连接配置</p>
+      </motion.div>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <motion.div variants={item} className="lg:col-span-2">
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                套餐详情
+              </CardTitle>
+              <CardDescription>当前生效的订阅计划信息</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">当前套餐</p>
+                <p className="text-2xl font-bold text-primary">{subscription?.plan?.name || "未订阅"}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">到期时间</p>
+                <p className="text-2xl font-bold">
+                  {subscription?.expired_at ? new Date(subscription.expired_at).toLocaleDateString() : "长期有效"}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">流量重置日</p>
+                <p className="text-lg font-semibold">
+                  {subscription?.reset_day ? `每月 ${subscription.reset_day} 日` : "不重置"}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">下次重置</p>
+                <p className="text-lg font-semibold">
+                  {subscription?.next_reset_at ? new Date(subscription.next_reset_at).toLocaleDateString() : "—"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card className="h-full border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gauge className="h-5 w-5 text-primary" />
+                使用限制
+              </CardTitle>
+              <CardDescription>当前套餐的限制参数</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Zap className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-medium">速率限制</p>
+                    <p className="text-xs text-muted-foreground">最高连接速率</p>
+                  </div>
+                </div>
+                <span className="font-bold text-lg">
+                  {effectiveSpeedLimit ? `${effectiveSpeedLimit} Mbps` : "无限制"}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Smartphone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-medium">设备限制</p>
+                    <p className="text-xs text-muted-foreground">同时在线设备数</p>
+                  </div>
+                </div>
+                <span className="font-bold text-lg">
+                  {effectiveDeviceLimit ? `${effectiveDeviceLimit} 台` : "无限制"}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <motion.div variants={item}>
+        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              当前套餐
+              <Download className="h-5 w-5 text-primary" />
+              流量使用
             </CardTitle>
-            <CardDescription>订阅状态与流量使用情况</CardDescription>
+            <CardDescription>实时流量统计与剩余用量</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-2xl font-semibold">{subscription.plan?.name || "未订阅"}</p>
-              {subscription.expired_at && (
-                <Badge variant="outline">
-                  到期：{new Date(subscription.expired_at).toLocaleDateString("zh-CN")}
-                </Badge>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>已使用 {formatBytes(usage.used)}</span>
-                <span>总计 {formatBytes(subscription.transfer_enable)}</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm font-medium">
+                <span>已用 {usage.percent}%</span>
+                <span className={usage.percent > 80 ? "text-destructive" : "text-primary"}>
+                  {formatBytes(usage.used)} / {formatBytes(subscription?.transfer_enable || 0)}
+                </span>
               </div>
-              <div className="mt-2 h-2 w-full bg-muted">
-                <div className="h-full bg-primary" style={{ width: `${usage.percent}%` }} />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-lg border bg-card p-4">
-                <p className="text-sm text-muted-foreground">上传</p>
-                <p className="text-xl font-semibold">{formatBytes(subscription.u)}</p>
-              </div>
-              <div className="rounded-lg border bg-card p-4">
-                <p className="text-sm text-muted-foreground">下载</p>
-                <p className="text-xl font-semibold">{formatBytes(subscription.d)}</p>
-              </div>
-              <div className="rounded-lg border bg-card p-4">
-                <p className="text-sm text-muted-foreground">速率 / 设备</p>
-                <p className="text-xl font-semibold">
-                  {effectiveSpeedLimit ? `${effectiveSpeedLimit} Mbps` : "不限速"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {typeof effectiveDeviceLimit === "number" ? `设备上限 ${effectiveDeviceLimit} 台` : "不限制设备上限"}
-                </p>
+              <div className="h-4 w-full bg-secondary rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-primary rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${usage.percent}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
               </div>
             </div>
-            {subscription.remarks && (
-              <p className="rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
-                {subscription.remarks}
-              </p>
-            )}
+            
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-xl bg-background/50 border border-border/50">
+                <p className="text-xs text-muted-foreground mb-1">上传流量</p>
+                <p className="text-lg font-semibold">{formatBytes(subscription?.u || 0)}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-background/50 border border-border/50">
+                <p className="text-xs text-muted-foreground mb-1">下载流量</p>
+                <p className="text-lg font-semibold">{formatBytes(subscription?.d || 0)}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+      </motion.div>
 
-        <Card className="lg:col-span-1">
+      <motion.div variants={item}>
+        <Card className="border-none shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>订阅链接</CardTitle>
-            <CardDescription>导入到客户端即可同步节点</CardDescription>
+            <CardTitle>订阅连接</CardTitle>
+            <CardDescription>
+              您的专属订阅链接，请勿泄露给他人。如遇连接问题，可尝试重置订阅。
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Textarea
-              readOnly
-              value={subscription.subscribe_url}
-              className="h-32 w-full resize-none font-mono text-sm break-all"
-            />
-            <Button
-              className="w-full"
-              variant="secondary"
-              onClick={handleCopySubscribe}
-              disabled={copyState === "copying"}
-            >
-              {copyState === "copying" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : copyState === "copied" ? (
-                <Check className="mr-2 h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="mr-2 h-4 w-4" />
-              )}
-              {copyState === "copied" ? "已复制" : "复制订阅链接"}
-            </Button>
-            <Button className="w-full" onClick={handleResetSecurity} disabled={action === "reset"}>
-              <RefreshCw
-                className={`mr-2 h-4 w-4 ${action === "reset" ? "animate-spin" : ""}`}
-                aria-hidden={action !== "reset"}
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/10 to-transparent pointer-events-none" />
+              <Textarea
+                readOnly
+                value={subscription?.subscribe_url || ""}
+                className="min-h-[100px] resize-none font-mono text-xs bg-muted/50 border-border/50 focus-visible:ring-primary/20"
               />
-              {action === "reset" ? "重新生成中..." : "重新生成链接"}
-            </Button>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                onClick={handleCopySubscribe} 
+                className="flex-1 gap-2 shadow-md hover:shadow-lg transition-all"
+                disabled={!subscription?.subscribe_url}
+              >
+                {copyState === "copied" ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                {copyState === "copied" ? "已复制" : "复制订阅链接"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleResetToken}
+                disabled={action === "reset"}
+                className="flex-1 gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-all"
+              >
+                {action === "reset" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                重置订阅链接
+              </Button>
+            </div>
           </CardContent>
         </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TimerReset className="h-5 w-5 text-primary" />
-            重置信息
-          </CardTitle>
-          <CardDescription>流量将在每月第 {subscription.reset_day ?? "-"} 天自动重置</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">下次重置</p>
-            <p className="text-lg font-semibold">
-              {subscription.next_reset_at ? new Date(subscription.next_reset_at).toLocaleDateString("zh-CN") : "--"}
-            </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">订阅 Token</p>
-            <div className="break-all rounded-md border border-dashed bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
-              {subscription.token}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
