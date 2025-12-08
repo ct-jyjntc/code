@@ -228,11 +228,11 @@ export default function OrdersPage() {
     if (!orderDetail) return
     setCheckingStatus(true)
     try {
-      const status = await api.checkOrderStatus(orderDetail.trade_no!)
-      if (status) {
+      const result = await api.checkOrderStatus(orderDetail.trade_no!)
+      if (result?.status === "completed") {
         toast({
-          title: "支付成功",
-          description: "订单已完成支付",
+          title: "请刷新网页",
+          description: "支付完成后请刷新页面查看最新订单状态",
         })
         handleCloseDialog()
         fetchOrders(true)
