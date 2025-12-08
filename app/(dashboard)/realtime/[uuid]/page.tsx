@@ -1,15 +1,14 @@
 "use client"
 
-import Link from "next/link"
-import { use, useEffect, useMemo, useState } from "react"
 import { AlertTriangle, ArrowLeft, Info, RefreshCw } from "lucide-react"
 import { motion } from "framer-motion"
+import Link from "next/link"
+import { use, useEffect, useState } from "react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { KOMARI_API_BASE, buildKomariHeaders } from "@/lib/komari"
 import { cn } from "@/lib/utils"
@@ -21,12 +20,6 @@ type NodeMeta = {
   group?: string
 }
 
-type PingRecord = {
-  task_id: number
-  time: string
-  value: number
-}
-
 type PingTask = {
   id: number
   interval: number
@@ -34,12 +27,11 @@ type PingTask = {
   loss: number
 }
 
-type TimeRangeKey = "1h" | "4h" | "24h"
-
-const RANGE_HOURS: Record<TimeRangeKey, number> = {
-  "1h": 1,
-  "4h": 4,
-  "24h": 24,
+type TaskWithLatest = PingTask & {
+  latest?: {
+    time: string | null
+    value: number | null
+  } | null
 }
 
 const container = {
@@ -52,18 +44,13 @@ const container = {
   }
 }
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-}
-
 export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid: string }> }) {
   const resolvedParams = use(params)
   const uuid = resolvedParams?.uuid ?? ""
   const [node, setNode] = useState<NodeMeta | null>(null)
-  const [records, setRecords] = useState<PingRecord[]>([])
-  const [tasks, setTasks] = useState<PingTask[]>([])
-  const [range, setRange] = useState<TimeRangeKey>("1h")
+  const [tasks, setTasks] = useState<TaskWithLatest[]>([])
+  const [latestByTask, setLatestByTask] = useState<Map<number, { time: number; value: number }>>(new Map())
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [refreshTick, setRefreshTick] = useState(0)
@@ -121,9 +108,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
       setRefreshing(true)
       setErrorMessage(null)
       try {
-        const hours = RANGE_HOURS[range] ?? 1
-        const response = await fetch(`${KOMARI_API_BASE}/api/records/ping?uuid=${uuid}&hours=${hours}`, {
-          headers: buildKomariHeaders(),
+        const response = await fetch(`/api/komari/ping?uuid=${uuid}&hours=1`, {
           cache: "no-store",
           signal: controller.signal,
         })
@@ -133,13 +118,29 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
         }
 
         const payload = await response.json()
-        const tasksPayload = Array.isArray(payload?.data?.tasks) ? (payload.data.tasks as PingTask[]) : []
-        const recordPayload = Array.isArray(payload?.data?.records) ? (payload.data.records as PingRecord[]) : []
+        const tasksPayload = Array.isArray(payload?.data?.tasks) ? (payload.data.tasks as TaskWithLatest[]) : []
+        const latestMap = new Map<number, { time: number; value: number }>()
+
+        tasksPayload.forEach((task) => {
+          if (task.latest?.time) {
+            const time = Date.parse(task.latest.time)
+            if (Number.isFinite(time)) {
+              latestMap.set(task.id, {
+                time,
+                value: Number(task.latest.value ?? 0),
+              })
+            }
+          }
+        })
+
+        const lastUpdatedValue = typeof payload?.data?.lastUpdated === "string" ? payload.data.lastUpdated : null
+        const latestTimeFallback = Array.from(latestMap.values()).reduce((max, item) => Math.max(max, item.time), 0)
 
         if (cancelled) return
 
         setTasks(tasksPayload)
-        setRecords(recordPayload)
+        setLatestByTask(latestMap)
+        setLastUpdated(lastUpdatedValue ?? (latestTimeFallback ? new Date(latestTimeFallback).toISOString() : null))
       } catch (error) {
         if (cancelled || (error as Error).name === "AbortError") return
         console.error("[realtime-detail] Failed to load ping data:", error)
@@ -162,30 +163,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
       cancelled = true
       controller.abort()
     }
-  }, [uuid, range, refreshTick, toast])
-
-  const latestByTask = useMemo(() => {
-    const map = new Map<number, { time: number; value: number }>()
-    records.forEach((record) => {
-      const time = Date.parse(record.time)
-      const existing = map.get(record.task_id)
-      if (!existing || time > existing.time) {
-        map.set(record.task_id, { time, value: Number(record.value ?? 0) })
-      }
-    })
-    return map
-  }, [records])
-
-  const lastUpdated = useMemo(() => {
-    let latest = 0
-    records.forEach((record) => {
-      const time = Date.parse(record.time)
-      if (Number.isFinite(time) && time > latest) {
-        latest = time
-      }
-    })
-    return latest > 0 ? new Date(latest).toISOString() : null
-  }, [records])
+  }, [uuid, refreshTick, toast])
 
   const handleRefresh = () => {
     setRefreshTick((prev) => prev + 1)
@@ -199,16 +177,12 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
 
   const renderLoadingState = () => (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/realtime">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            返回实时流量
-          </Link>
-        </Button>
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-4 w-24" />
-      </div>
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/realtime">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          返回实时流量
+        </Link>
+      </Button>
 
       <div className="space-y-3">
         <Skeleton className="h-8 w-40" />
@@ -243,7 +217,7 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
     </div>
   )
 
-  if (loading && !records.length) {
+  if (loading && !tasks.length) {
     return renderLoadingState()
   }
 
@@ -275,22 +249,13 @@ export default function RealtimeLatencyPage({ params }: { params: Promise<{ uuid
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
-          <Tabs value={range} onValueChange={(value) => setRange(value as TimeRangeKey)}>
-            <TabsList className="bg-background/50">
-              <TabsTrigger value="1h">1小时</TabsTrigger>
-              <TabsTrigger value="4h">4小时</TabsTrigger>
-              <TabsTrigger value="24h">1天</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span>
-              最近更新：{lastUpdated ? new Date(lastUpdated).toLocaleString("zh-CN", { hour12: false }) : "等待数据"}
-            </span>
-            <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing} className="bg-background/50">
-              <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-            </Button>
-          </div>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span>
+            最近更新：{lastUpdated ? new Date(lastUpdated).toLocaleString("zh-CN", { hour12: false }) : "等待数据"}
+          </span>
+          <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing} className="bg-background/50">
+            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+          </Button>
         </div>
       </motion.div>
 
