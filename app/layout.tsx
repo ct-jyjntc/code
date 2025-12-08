@@ -30,11 +30,11 @@ export default function RootLayout({
               backgroundImage: "url('https://file.xiercloud.uk/seele.jpg')",
               backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
-              backgroundAttachment: "fixed",
+              backgroundAttachment: "scroll",
               backgroundPosition: "center",
             }}
           />
-          <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-white/80 dark:bg-black/80" />
         </div>
         <ThemeProvider defaultTheme="light">{children}</ThemeProvider>
         <Analytics />
