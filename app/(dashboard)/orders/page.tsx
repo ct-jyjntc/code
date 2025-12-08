@@ -206,12 +206,17 @@ export default function OrdersPage() {
     setPaying(true)
     try {
       const result = await api.checkoutOrder(orderDetail.trade_no!, selectedPaymentMethod)
-      setCheckoutResult(result)
       
       // 如果是跳转支付，自动跳转
-      if (result.type === -1 && result.data) {
-        window.location.href = result.data
+      // 修复：易支付等渠道可能返回 type=1 但实际是支付链接，强制跳转
+      if ((result.type === -1 || result.type === 1) && result.data) {
+        window.open(result.data, '_blank')
+        // 设置为跳转状态，避免显示二维码
+        setCheckoutResult({ ...result, type: -1 })
+        return
       }
+
+      setCheckoutResult(result)
     } catch (error) {
       console.error("Checkout failed:", error)
       toast({
@@ -240,7 +245,7 @@ export default function OrdersPage() {
         toast({
           title: "尚未支付",
           description: "系统尚未收到支付回调，请稍后刷新",
-          variant: "secondary",
+          // variant: "default",
         })
       }
     } catch (error) {
@@ -487,8 +492,11 @@ export default function OrdersPage() {
                       <p className="text-sm text-gray-500">请使用{paymentMethods.find(m => m.id === selectedPaymentMethod)?.name}扫码支付</p>
                     </div>
                   ) : (
-                    <div className="p-4 bg-muted/50 rounded-lg text-center">
-                      <p className="text-sm text-muted-foreground">正在跳转支付...</p>
+                    <div className="p-4 bg-muted/50 rounded-lg text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">支付页面已在新窗口打开</p>
+                      <Button variant="link" size="sm" className="h-auto p-0 text-primary" onClick={() => window.open(checkoutResult.data, '_blank')}>
+                        如果没有自动跳转，请点击这里
+                      </Button>
                     </div>
                   )}
                 </div>
