@@ -882,10 +882,23 @@ export const api = {
     return normalizeSubscription(data)
   },
 
-  resetSecurity: async () => {
+  resetSubscriptionToken: async () => {
     if (USE_MOCK_DATA) return mockSubscriptionInfo
-    await fetchWithAuth("/user/resetSecurity")
+    try {
+      await fetchWithAuth("/user/resetSecurity", { method: "POST" })
+    } catch (error) {
+      // Some backends may only accept GET; fall back to maintain compatibility.
+      if (error instanceof ApiError && error.status === 405) {
+        await fetchWithAuth("/user/resetSecurity")
+      } else {
+        throw error
+      }
+    }
     return api.getSubscriptionInfo()
+  },
+
+  resetSecurity: async () => {
+    return api.resetSubscriptionToken()
   },
 
   getActiveSessions: async () => {
