@@ -25,6 +25,10 @@ export async function GET(request: NextRequest) {
     upstreamUrl.searchParams.set("hours", hours)
   }
 
+  if (!KOMARI_API_KEY) {
+    return NextResponse.json({ error: "KOMARI_API_KEY is not configured on the server" }, { status: 500 })
+  }
+
   try {
     const response = await fetch(upstreamUrl.toString(), {
       headers: {

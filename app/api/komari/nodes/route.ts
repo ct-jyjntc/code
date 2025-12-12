@@ -4,13 +4,20 @@ import { KOMARI_API_BASE, KOMARI_API_KEY } from "@/lib/komari"
 export const runtime = "edge"
 
 export async function GET(request: NextRequest) {
+  if (!KOMARI_API_KEY) {
+    return NextResponse.json(
+      { error: "KOMARI_API_KEY is not configured on the server" },
+      { status: 500 },
+    )
+  }
+
   try {
     const response = await fetch(`${KOMARI_API_BASE}/api/nodes`, {
       headers: {
-        "Authorization": `Bearer ${KOMARI_API_KEY}`,
-        "Accept": "application/json"
+        Authorization: `Bearer ${KOMARI_API_KEY}`,
+        Accept: "application/json",
       },
-      cache: "no-store"
+      cache: "no-store",
     })
 
     if (!response.ok) {

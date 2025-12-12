@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 
-const PICGO_ENDPOINT = "https://www.picgo.net/api/1/upload"
-const PICGO_API_KEY = "chv_SPkDM_c248014d65780b4af1faedba654c0df56d978b516d50258aba77a9d1f9101a9d46c8238b550df61dafbd8a60665e3604b14a443f4bb4d39f9851cc57aab79fd9"
+const PICGO_ENDPOINT = process.env.PICGO_ENDPOINT ?? "https://www.picgo.net/api/1/upload"
+const PICGO_API_KEY = process.env.PICGO_API_KEY
 
 export async function POST(request: NextRequest) {
+  if (!PICGO_API_KEY) {
+    return NextResponse.json({ message: "PICGO_API_KEY is not configured on the server" }, { status: 500 })
+  }
+
   try {
     const contentType = request.headers.get("content-type") || ""
     if (!contentType.includes("multipart/form-data")) {
